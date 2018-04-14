@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: grapeupci/java
+    tag: latest
+
+inputs:
+- name: sourcecode
+
+run:
+  path: sh
+  args:
+  - -exc
+  - |
+    chmod +x sourcecode/ci/tasks/build.sh
+    chmod +x sourcecode/gradlew
+    sourcecode/ci/tasks/build.sh
