@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User save(String name) {
         User user = new User();
-        user.setUserName(name);
+        //user.setUserName(name);
         return userRepository.save(user);
     }
 
