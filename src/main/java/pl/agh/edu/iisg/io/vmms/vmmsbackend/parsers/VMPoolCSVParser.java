@@ -2,19 +2,17 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.parsers;
 
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
 
-import java.util.Optional;
-
 public class VMPoolCSVParser {
 
     private static final String DELIMINATOR = ",";
     private static final String QUOTE = "\"";
     private static final int ARGS_NUMBER = 5;
 
-    public VMPool parseLine(String line){
+    public VMPool parseLine(String line) {
 
-        String[] fields = line.split(QUOTE+DELIMINATOR+QUOTE);
+        String[] fields = line.split(QUOTE + DELIMINATOR + QUOTE);
 
-        if(fields.length != ARGS_NUMBER)
+        if (fields.length != ARGS_NUMBER)
             return null;
 
         VMPool vmPool = new VMPool();

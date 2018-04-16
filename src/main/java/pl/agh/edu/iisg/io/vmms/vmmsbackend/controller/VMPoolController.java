@@ -20,8 +20,12 @@ import java.util.Optional;
 @RequestMapping("/vm")
 public class VMPoolController {
 
+    private final VMPoolService vmPoolService;
+
     @Autowired
-    VMPoolService vmPoolService;
+    public VMPoolController(VMPoolService vmPoolService) {
+        this.vmPoolService = vmPoolService;
+    }
 
     @RequestMapping(path = "/", method = RequestMethod.GET)
     public List<VMPool> getAllVMPools() {

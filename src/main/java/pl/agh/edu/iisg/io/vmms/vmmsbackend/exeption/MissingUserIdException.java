@@ -2,7 +2,7 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption;
 
 
 public class MissingUserIdException extends HttpException {
-    private int httpStatus;
+    private final int httpStatus;
 
     public MissingUserIdException() {
         super("Please provide user id!");

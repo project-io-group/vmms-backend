@@ -8,10 +8,14 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.VMPoolRepository;
 import java.util.List;
 
 @Service
-public class VMPoolServiceImpl implements VMPoolService{
+public class VMPoolServiceImpl implements VMPoolService {
+
+    private final VMPoolRepository vmPoolRepository;
 
     @Autowired
-    private VMPoolRepository vmPoolRepository;
+    public VMPoolServiceImpl(VMPoolRepository vmPoolRepository) {
+        this.vmPoolRepository = vmPoolRepository;
+    }
 
     @Override
     public List<VMPool> getVMPools() {

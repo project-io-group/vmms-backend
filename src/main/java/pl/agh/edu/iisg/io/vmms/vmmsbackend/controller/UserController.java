@@ -21,8 +21,12 @@ public class UserController {
     private static final String NAME = "name";
     private static final String USER_ID = "userId";
 
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @RequestMapping("/")
     public String index() {

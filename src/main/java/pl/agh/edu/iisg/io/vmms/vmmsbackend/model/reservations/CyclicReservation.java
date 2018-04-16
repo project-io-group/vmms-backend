@@ -2,12 +2,11 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.persistence.Transient;
-import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
@@ -20,6 +19,7 @@ import java.util.stream.Stream;
 @Data
 @Entity
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @DiscriminatorValue(value = "Cyclic")
 public class CyclicReservation extends Reservation {

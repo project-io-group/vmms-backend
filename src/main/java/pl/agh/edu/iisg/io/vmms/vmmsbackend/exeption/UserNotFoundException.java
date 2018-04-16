@@ -2,7 +2,7 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption;
 
 
 public class UserNotFoundException extends HttpException {
-    private int httpStatus;
+    private final int httpStatus;
 
     public UserNotFoundException() {
         super("Please provide correct user data!");

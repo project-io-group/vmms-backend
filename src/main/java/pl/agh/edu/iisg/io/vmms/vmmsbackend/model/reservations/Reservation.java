@@ -9,7 +9,6 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -26,21 +25,21 @@ public abstract class Reservation {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name="userId")
+    @JoinColumn(name = "userId")
     private User owner;
 
     private String courseName;
 
     @ManyToOne
-    @JoinColumn(name="poolId")
+    @JoinColumn(name = "poolId")
     private VMPool pool;
 
-    @Column(name = "date",columnDefinition="TIMESTAMP")
+    @Column(name = "date", columnDefinition = "TIMESTAMP")
     @NotNull
     @ElementCollection
     @CollectionTable(
-            name="reservations_details",
-            joinColumns=@JoinColumn(name="reservationId")
+            name = "reservations_details",
+            joinColumns = @JoinColumn(name = "reservationId")
     )
     private List<Date> dates;
 

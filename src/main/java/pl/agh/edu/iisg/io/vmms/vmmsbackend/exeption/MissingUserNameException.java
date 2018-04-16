@@ -2,7 +2,7 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption;
 
 
 public class MissingUserNameException extends HttpException {
-    private int httpStatus;
+    private final int httpStatus;
 
     public MissingUserNameException() {
         super("Please provide user name!");

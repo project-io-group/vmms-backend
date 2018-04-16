@@ -16,25 +16,19 @@ import java.util.Set;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class VMPool {
 
+    @OneToMany(mappedBy = "pool")
+    public Set<Reservation> reservations;
     @Id
     @GeneratedValue
     private Long id;
-
-    @Column(unique=true, nullable=false)
+    @Column(unique = true, nullable = false)
     private String shortName;
-
     @NotNull
     private String displayName;
-
     @Min(0)
     @NotNull
     private Integer maximumCount;
-
     @NotNull
     private Boolean enabled;
-
     private String description;
-
-    @OneToMany(mappedBy = "pool")
-    public Set<Reservation> reservations;
 }

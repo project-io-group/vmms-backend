@@ -17,14 +17,12 @@ import java.util.Set;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
 
+    @OneToMany(mappedBy = "owner")
+    public Set<Reservation> reservations;
     @Id
     @GeneratedValue
     private Long id;
-
     @NotNull
     private String userName;
-
-    @OneToMany(mappedBy = "owner")
-    public Set<Reservation> reservations;
 
 }

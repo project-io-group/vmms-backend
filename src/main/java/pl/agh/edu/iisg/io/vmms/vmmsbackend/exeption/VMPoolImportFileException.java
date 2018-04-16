@@ -1,8 +1,8 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption;
 
 public class VMPoolImportFileException extends HttpException {
-    private int httpStatus;
-    private String errorDescription;
+    private final int httpStatus;
+    private final String errorDescription;
 
     public VMPoolImportFileException(String description) {
         super("Please provide valid file!");
