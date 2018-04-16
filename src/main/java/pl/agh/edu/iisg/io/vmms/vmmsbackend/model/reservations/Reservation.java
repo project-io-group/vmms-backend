@@ -16,7 +16,6 @@ import java.util.List;
 @Data
 @Entity
 @NoArgsConstructor
-@Table(name = "reservations")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "reservation_type")
@@ -48,44 +47,4 @@ public abstract class Reservation {
     @NotNull
     @Min(0)
     private Integer machinesNumber;
-
-    public abstract static class Builder<T extends Reservation>{
-        private VMPool pool;
-        private User owner;
-        private String courseName;
-        private Integer machinesNumber;
-
-        public Builder<T> pool(VMPool pool) {
-            this.pool = pool;
-            return this;
-        }
-
-        public Builder<T> owner(User owner) {
-            this.owner = owner;
-            return this;
-        }
-
-        public Builder<T> courseName(String courseName) {
-            this.courseName = courseName;
-            return this;
-        }
-
-        public Builder<T> machinesNumber(Integer machinesNumber) {
-            this.machinesNumber = machinesNumber;
-            return this;
-        }
-        public abstract T build();
-    }
-
-    Reservation(Builder builder){
-        this.pool = builder.pool;
-        this.owner = builder.owner;
-        this.courseName = builder.courseName;
-        this.dates = new ArrayList<>();
-        this.machinesNumber = builder.machinesNumber;
-    }
-
-    void addDate(Date date){
-        dates.add(date);
-    }
 }

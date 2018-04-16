@@ -6,10 +6,14 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Transient;
+import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Data
@@ -19,47 +23,17 @@ import java.util.stream.Stream;
 @DiscriminatorValue(value = "Cyclic")
 public class CyclicReservation extends Reservation {
 
-    public static abstract class Builder<T extends Reservation> extends Reservation.Builder<T> {
-        private Date firstReservationDate;
-        private Date lastReservationDate;
-        private int intervalInDays;
+    public void setDates(Date firstReservationDate, Date lastReservationDate, int intervalInDays){
 
-        public Builder<T> firstReservationDate(Date date) {
-            this.firstReservationDate = date;
-            return this;
-        }
+        LocalDate first = firstReservationDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate last = lastReservationDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-        public Builder<T> lastReservationDate(Date date) {
-            this.lastReservationDate = date;
-            return this;
-        }
-
-        public Builder<T> intervalInDays(int days) {
-            this.intervalInDays = days;
-            return this;
-        }
-    }
-
-    public static Builder<?> builder() {
-        return new Builder<CyclicReservation>()
-        {
-            @Override
-            public CyclicReservation build()
-            {
-                return new CyclicReservation(this);
-            }
-        };
-    }
-
-    private CyclicReservation(Builder builder){
-        super(builder);
-
-        LocalDate first = builder.firstReservationDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate last = builder.lastReservationDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
-        Stream.iterate(first, date -> date.plusDays(builder.intervalInDays))
+        Stream<Date> dateStream = Stream.iterate(first, date -> date.plusDays(intervalInDays))
                 .limit(ChronoUnit.DAYS.between(first, last) + 2)
-                .forEach(date -> super.addDate(
-                        Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant())));
+                .map(date ->
+                        Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+        List<Date> date = dateStream.collect(Collectors.toList());
+        super.setDates(date);
     }
 }
