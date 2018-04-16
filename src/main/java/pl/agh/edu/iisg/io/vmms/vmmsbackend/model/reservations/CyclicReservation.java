@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.Transient;
 import java.lang.reflect.Array;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -23,17 +24,26 @@ import java.util.stream.Stream;
 @DiscriminatorValue(value = "Cyclic")
 public class CyclicReservation extends Reservation {
 
-    public void setDates(Date firstReservationDate, Date lastReservationDate, int intervalInDays){
+    public void setDates(Date startDateInclusive, Date endDateExclusive, Period cycleInterval) {
 
-        LocalDate first = firstReservationDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate last = lastReservationDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate start = convertToLocal(startDateInclusive);
+        LocalDate end = convertToLocal(endDateExclusive);
 
-        Stream<Date> dateStream = Stream.iterate(first, date -> date.plusDays(intervalInDays))
-                .limit(ChronoUnit.DAYS.between(first, last) + 2)
-                .map(date ->
-                        Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        Stream<Date> cyclicDates = Stream.iterate(start, date -> date.plus(cycleInterval))
+                .limit(
+                        ChronoUnit.DAYS.between(start, end) / cycleInterval.getDays()
+                ).map(date ->
+                        Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant())
+                );
 
-        List<Date> date = dateStream.collect(Collectors.toList());
-        super.setDates(date);
+        List<Date> dates = cyclicDates.collect(Collectors.toList());
+        super.setDates(dates);
     }
+
+    private LocalDate convertToLocal(Date date) {
+        return date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+    }
+
 }
