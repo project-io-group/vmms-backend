@@ -16,6 +16,6 @@ public class UserNotFoundException extends HttpException {
 
     @Override
     public String getErrorDescription() {
-        return "User not found!";
+        return "ApplicationUser not found!";
     }
 }

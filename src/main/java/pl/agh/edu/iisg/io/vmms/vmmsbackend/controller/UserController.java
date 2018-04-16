@@ -1,13 +1,14 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.controller;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.HttpException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.MissingUserIdException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.UserNotFoundException;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.ApplicationUser;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.security.SecurityConstants;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.UserService;
 
 import java.util.List;
@@ -21,8 +22,14 @@ public class UserController {
     private static final String NAME = "name";
     private static final String USER_ID = "userId";
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    public UserController(UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+        this.userService = userService;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    }
+
 
     @RequestMapping("/")
     public String index() {
@@ -30,28 +37,35 @@ public class UserController {
     }
 
     @RequestMapping(path = "/users", method = RequestMethod.GET)
-    public List<User> getUsers() {
+    public List<ApplicationUser> getUsers() {
         return userService.getUsers();
     }
 
     @RequestMapping(path = "/users/{name}", method = RequestMethod.GET)
-    public List<User> getUsers(@PathVariable String name) {
+    public List<ApplicationUser> getUsers(@PathVariable String name) {
         return userService.findByNameContaining(name);
+    }
+
+    @PostMapping(SecurityConstants.SIGN_UP_URL)
+    @ResponseStatus(HttpStatus.CREATED)
+    public void signUp(@RequestBody ApplicationUser applicationUser) {
+        applicationUser.setPassword(bCryptPasswordEncoder.encode(applicationUser.getPassword()));
+        userService.save(applicationUser);
     }
 
     @RequestMapping(path = "/user/create", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public User createUser(@RequestBody Map<String, String> request) throws HttpException {
+    public ApplicationUser createUser(@RequestBody Map<String, String> request) throws HttpException {
         String userName = Optional.ofNullable(request.get(NAME)).orElseThrow(MissingUserIdException::new);
         return userService.save(userName);
     }
 
     @RequestMapping(path = "/user/delete", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
-    public User deleteUser(@RequestBody Map<String, Long> request) throws HttpException {
+    public ApplicationUser deleteUser(@RequestBody Map<String, Long> request) throws HttpException {
         Long userId = Optional.ofNullable(request.get(USER_ID)).orElseThrow(MissingUserIdException::new);
-        User user = Optional.ofNullable(userService.find(userId)).orElseThrow(UserNotFoundException::new);
-        userService.delete(user);
-        return user;
+        ApplicationUser applicationUser = Optional.ofNullable(userService.find(userId)).orElseThrow(UserNotFoundException::new);
+        userService.delete(applicationUser);
+        return applicationUser;
     }
 }

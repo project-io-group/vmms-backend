@@ -26,8 +26,8 @@ option -d is for running in the background
 `insert into users(id, user_name) values (1, 'ala');`
 
 ### Manually checking endpoints:
-`curl -H "Content-Type: application/json" -X POST -d '{"name": "ala"}' http://localhost:9045/user/create`
-`curl -H "Content-Type: application/json" -X POST -d '{"userId": 1}' http://localhost:9045/user/delete`
+`curl -H "Content-Type: application/json" -X POST -d '{"name": "ala"}' http://localhost:9045/applicationUser/create`
+`curl -H "Content-Type: application/json" -X POST -d '{"userId": 1}' http://localhost:9045/applicationUser/delete`
 
 ### You can check users at:
 `http://localhost:9045/users`
