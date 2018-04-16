@@ -10,9 +10,9 @@ import javax.validation.constraints.NotNull;
 
 @Data
 @Entity
+@NoArgsConstructor
 @Table(name = "users")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@NoArgsConstructor
 public class ApplicationUser {
 
     @Id

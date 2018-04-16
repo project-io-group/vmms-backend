@@ -5,22 +5,22 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.UserRepository;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.UserService;
 
 import static java.util.Collections.emptyList;
 
 @Service
 public class ApplicationUserDetailsServiceImpl implements UserDetailsService {
 
-    private UserRepository userRepository;
+    private UserService userService;
 
-    public ApplicationUserDetailsServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public ApplicationUserDetailsServiceImpl(UserService userService) {
+        this.userService = userService;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        ApplicationUser applicationUser = userRepository.findFirstByUserName(username);
+        ApplicationUser applicationUser = userService.find(username);
         if (applicationUser == null) {
             throw new UsernameNotFoundException(username);
         }
