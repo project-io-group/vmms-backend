@@ -18,3 +18,8 @@ Simply import project as gradle project
 
 ### You can check users at:
 `http://localhost:9045/users`
+
+### You can check vm pools at:  
+`http://localhost:9045/vm/` (list all)   
+`http://localhost:9045/vm/enabled` (list only enabled)   
+`http://localhost:9045/vm/tag/some_tag` (list all with some_tag in description) 
