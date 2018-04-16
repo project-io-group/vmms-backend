@@ -25,4 +25,7 @@ public class User {
     @NotNull
     private String userName;
 
+    @NotNull
+    private boolean isAdmin;
+
 }
