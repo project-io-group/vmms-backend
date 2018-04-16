@@ -1,4 +1,6 @@
-package pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption;
+package pl.agh.edu.iisg.io.vmms.vmmsbackend.exception;
+
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.HttpException;
 
 public class VMPoolImportFileException extends HttpException {
     private final int httpStatus;

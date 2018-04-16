@@ -4,9 +4,9 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.HttpException;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.MissingUserIdException;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.UserNotFoundException;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.HttpException;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.MissingUserIdException;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.UserNotFoundException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.UserService;
 

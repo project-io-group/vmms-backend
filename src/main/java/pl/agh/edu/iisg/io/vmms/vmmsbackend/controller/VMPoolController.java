@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.HttpException;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.VMPoolImportFileException;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.VMPoolImportFileException;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.HttpException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.parsers.VMPoolCSVParser;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.VMPoolService;
@@ -67,6 +67,7 @@ public class VMPoolController {
                 throw new VMPoolImportFileException("Failed to open the file!");
             }
         }
+
         return "Created " + vmPoolsNumber + "virtual machine pools.";
     }
 }

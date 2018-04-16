@@ -1,4 +1,4 @@
-package pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption;
+package pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http;
 
 
 public class MissingUserIdException extends HttpException {
