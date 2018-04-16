@@ -56,11 +56,16 @@ public class VMPoolController {
                 VMPoolCSVParser parser = new VMPoolCSVParser();
 
                 while ((line = bufferedReader.readLine()) != null) {
-                    VMPool vmPool = Optional
-                            .ofNullable(parser.parseLine(line))
-                            .orElseThrow(() -> new VMPoolImportFileException("Failed to parse the file!"));
-                    vmPoolService.save(vmPool);
-                    vmPoolsNumber++;
+                    Optional<VMPool> o = parser.parseLine(line);
+                    System.out.println("parsed");
+                    if(o.isPresent()) {
+                        System.out.println("parsed");
+                        vmPoolService.save(o.get());
+                        vmPoolsNumber++;
+                    }
+                    else {
+                        throw new VMPoolImportFileException("Failed to parse the file!");
+                    }
                 }
 
             } catch (Exception e) {
@@ -68,6 +73,6 @@ public class VMPoolController {
             }
         }
 
-        return "Created " + vmPoolsNumber + "virtual machine pools.";
+        return "Created " + vmPoolsNumber + " virtual machine pools.";
     }
 }

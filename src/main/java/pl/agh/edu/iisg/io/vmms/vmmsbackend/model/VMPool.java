@@ -30,5 +30,6 @@ public class VMPool {
     private Integer maximumCount;
     @NotNull
     private Boolean enabled;
+    @Column(length = 2048)
     private String description;
 }

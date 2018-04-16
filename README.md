@@ -22,4 +22,7 @@ Simply import project as gradle project
 ### You can check vm pools at:  
 `http://localhost:9045/vm/` (list all)   
 `http://localhost:9045/vm/enabled` (list only enabled)   
-`http://localhost:9045/vm/tag/some_tag` (list all with some_tag in description) 
+`http://localhost:9045/vm/tag/some_tag` (list all with some_tag in description)   
+
+### You can import pcoips (pcoip_pools.csv) with:
+`curl -i -X POST -F "file=@path_to_file" http://localhost:9045/vm/import`
