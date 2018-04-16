@@ -1,0 +1,19 @@
+package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
+
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
+
+import java.util.List;
+
+public interface VMPoolService {
+    List<VMPool> getVMPools();
+
+    List<VMPool> findByDisplayNameContaining(String name);
+
+    VMPool find(String displayName);
+
+    VMPool find(Long id);
+
+    VMPool save(VMPool vmPool);
+
+    void delete(VMPool vmPool);
+}
