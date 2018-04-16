@@ -28,9 +28,14 @@ public class VMPoolController {
         return vmPoolService.getVMPools();
     }
 
-    @RequestMapping(path = "/{tag}", method = RequestMethod.GET)
+    @RequestMapping(path = "/enabled", method = RequestMethod.GET)
+    public List<VMPool> getEnabledVMPools() {
+        return vmPoolService.getEnabledVMPools();
+    }
+
+    @RequestMapping(path = "/tag/{tag}", method = RequestMethod.GET)
     public List<VMPool> getVMPoolsByTag(@PathVariable String tag) {
-        return vmPoolService.findByDisplayNameContaining(tag);
+        return vmPoolService.findByDescriptionContaining(tag);
     }
 
     @RequestMapping(value = "/import", method = RequestMethod.POST)

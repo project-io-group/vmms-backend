@@ -3,7 +3,6 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.UserRepository;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.VMPoolRepository;
 
 import java.util.List;
@@ -20,8 +19,13 @@ public class VMPoolServiceImpl implements VMPoolService{
     }
 
     @Override
-    public List<VMPool> findByDisplayNameContaining(String displayName) {
-        return vmPoolRepository.findAllByDisplayNameContaining(displayName);
+    public List<VMPool> getEnabledVMPools() {
+        return vmPoolRepository.findAllByEnabled(true);
+    }
+
+    @Override
+    public List<VMPool> findByDescriptionContaining(String displayName) {
+        return vmPoolRepository.findAllByDescriptionContaining(displayName);
     }
 
     @Override

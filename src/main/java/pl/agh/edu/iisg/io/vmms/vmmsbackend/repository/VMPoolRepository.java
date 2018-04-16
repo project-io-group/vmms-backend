@@ -12,6 +12,7 @@ public interface VMPoolRepository extends JpaRepository<VMPool, Long> {
 
     VMPool findFirstByShortName(String shortName);
 
-    List<VMPool> findAllByDisplayNameContaining(String pattern);
+    List<VMPool> findAllByEnabled(Boolean enabled);
+    List<VMPool> findAllByDescriptionContaining(String pattern);
 
 }

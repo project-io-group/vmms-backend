@@ -7,7 +7,9 @@ import java.util.List;
 public interface VMPoolService {
     List<VMPool> getVMPools();
 
-    List<VMPool> findByDisplayNameContaining(String name);
+    List<VMPool> getEnabledVMPools();
+
+    List<VMPool> findByDescriptionContaining(String name);
 
     VMPool find(String displayName);
 
