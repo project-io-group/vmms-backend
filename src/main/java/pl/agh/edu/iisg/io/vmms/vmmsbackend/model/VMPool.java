@@ -13,7 +13,6 @@ import java.util.Set;
 @Data
 @Entity
 @NoArgsConstructor
-@Table(name = "vm_pools")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class VMPool {
 
