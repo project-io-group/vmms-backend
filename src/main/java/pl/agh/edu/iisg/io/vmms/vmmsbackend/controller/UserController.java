@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.HttpException;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.MissingUserIdException;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.MissingUserNameException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.UserNotFoundException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.UserService;
@@ -46,14 +46,14 @@ public class UserController {
     @RequestMapping(path = "/user/create", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public User createUser(@RequestBody Map<String, String> request) throws HttpException {
-        String userName = Optional.ofNullable(request.get(NAME)).orElseThrow(MissingUserIdException::new);
+        String userName = Optional.ofNullable(request.get(NAME)).orElseThrow(MissingUserNameException::new);
         return userService.save(userName);
     }
 
     @RequestMapping(path = "/user/delete", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
     public User deleteUser(@RequestBody Map<String, Long> request) throws HttpException {
-        Long userId = Optional.ofNullable(request.get(USER_ID)).orElseThrow(MissingUserIdException::new);
+        Long userId = Optional.ofNullable(request.get(USER_ID)).orElseThrow(MissingUserNameException::new);
         User user = Optional.ofNullable(userService.find(userId)).orElseThrow(UserNotFoundException::new);
         userService.delete(user);
         return user;
