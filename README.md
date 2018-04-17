@@ -31,3 +31,21 @@ option -d is for running in the background
 
 ### You can check users at:
 `http://localhost:9045/users`
+
+
+### registers a new user
+curl -H "Content-Type: application/json" -X POST -d '{
+    "username": "admin",
+    "password": "password"
+}' http://localhost:9045/sign-up
+
+#### logs into the application (JWT is generated)
+curl -i -H "Content-Type: application/json" -X POST -d '{
+    "username": "admin",
+    "password": "password"
+}' http://localhost:9045/login
+
+#### issue a POST request, passing the JWT, to create a task
+##### remember to replace xxx.yyy.zzz with the JWT retrieved above
+curl -H "Authorization: Bearer xxx.yyy.zzz" \
+-X GET http://localhost:9045/users
