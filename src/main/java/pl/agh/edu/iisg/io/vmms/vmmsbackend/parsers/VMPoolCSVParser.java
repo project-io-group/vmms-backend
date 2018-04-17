@@ -9,7 +9,8 @@ public class VMPoolCSVParser {
 
     private static final String DELIMINATOR = ",";
     private static final String QUOTE = "\"";
-    private static final int ARG_NUM = 5;
+    private static final int REQUIRED_ARGS_COUNT = 5;
+    private static final int ALL_ARGS_COUNT = 6;
 
     public Optional<VMPool> parseLine(String line) {
 
@@ -28,7 +29,7 @@ public class VMPoolCSVParser {
                 }
             }
         }
-        if( parsedFields.size() != ARG_NUM && parsedFields.size() != ARG_NUM+1 ){
+        if( parsedFields.size() != REQUIRED_ARGS_COUNT && parsedFields.size() != ALL_ARGS_COUNT){
             return Optional.empty();
         }
 
@@ -36,11 +37,15 @@ public class VMPoolCSVParser {
 
         vmPool.setDisplayName(parsedFields.get(2));
 
-        vmPool.setMaximumCount(Integer.valueOf(parsedFields.get(3)));
+        try {
+            vmPool.setMaximumCount(Integer.valueOf(parsedFields.get(3)));
+        } catch (NumberFormatException e){
+            return Optional.empty();
+        }
 
         vmPool.setEnabled(parsedFields.get(4).equals("true"));
 
-        if(parsedFields.size() > ARG_NUM)
+        if(parsedFields.size() == ALL_ARGS_COUNT)
             vmPool.setDescription(parsedFields.get(5));
         else
             vmPool.setDescription("");

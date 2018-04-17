@@ -11,6 +11,7 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.parsers.VMPoolCSVParser;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.VMPoolService;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Optional;
@@ -57,10 +58,19 @@ public class VMPoolController {
 
                 while ((line = bufferedReader.readLine()) != null) {
                     Optional<VMPool> o = parser.parseLine(line);
-                    System.out.println("parsed");
                     if(o.isPresent()) {
                         System.out.println("parsed");
-                        vmPoolService.save(o.get());
+                        try{
+                            vmPoolService.save(o.get());
+                        }catch (Exception e){
+                            String details = "";
+                            if(e.getMessage().contains("constraint [uk_")){
+                                details = " - Unique key";
+                            }else if(e.getMessage().contains("constraint [fk_")){
+                                details = " - Foreign key";
+                            }
+                            throw new VMPoolImportFileException("Constraint not met" + details);
+                        }
                         vmPoolsNumber++;
                     }
                     else {
@@ -68,7 +78,7 @@ public class VMPoolController {
                     }
                 }
 
-            } catch (Exception e) {
+            } catch (IOException e) {
                 throw new VMPoolImportFileException("Failed to open the file!");
             }
         }
