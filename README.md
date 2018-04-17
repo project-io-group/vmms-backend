@@ -4,6 +4,9 @@ Virtual Machine Management System Backend
 ## Installation
 Simply import project as gradle project
 
+### Lombok
+You need to use a `Lombok` plugin to be able to start the project from your IDE (You'll get compilation errors otherwise). There are installation instructions on [project's site](https://projectlombok.org/), among them instructions for [IntelliJ](https://projectlombok.org/setup/intellij) and [Eclipse](https://projectlombok.org/setup/eclipse).
+
 ## Development
 
 ### Manually running postgresql:
