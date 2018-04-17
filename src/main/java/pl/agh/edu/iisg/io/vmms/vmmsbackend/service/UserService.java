@@ -1,21 +1,21 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.ApplicationUser;
 
 import java.util.List;
 
 public interface UserService {
-    List<User> getUsers();
+    List<ApplicationUser> getUsers();
 
-    List<User> findByNameContaining(String name);
+    List<ApplicationUser> findByNameContaining(String name);
 
-    User find(String name);
+    ApplicationUser find(String name);
 
-    User find(Long id);
+    ApplicationUser find(Long id);
 
-    User save(User user);
+    ApplicationUser save(ApplicationUser applicationUser);
 
-    User save(String name);
+    ApplicationUser save(String name);
 
-    void delete(User user);
+    void delete(ApplicationUser applicationUser);
 }

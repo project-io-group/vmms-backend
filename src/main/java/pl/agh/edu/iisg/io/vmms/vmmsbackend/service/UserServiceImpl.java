@@ -3,7 +3,7 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.ApplicationUser;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.UserRepository;
 
 import java.util.List;
@@ -15,39 +15,39 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Override
-    public List<User> getUsers() {
+    public List<ApplicationUser> getUsers() {
         return userRepository.findAll();
     }
 
     @Override
-    public List<User> findByNameContaining(String name) {
+    public List<ApplicationUser> findByNameContaining(String name) {
         return userRepository.findAllByUserNameContaining(name);
     }
 
     @Override
-    public User find(String name) {
+    public ApplicationUser find(String name) {
         return userRepository.findFirstByUserName(name);
     }
 
     @Override
-    public User find(Long id) {
+    public ApplicationUser find(Long id) {
         return userRepository.getOne(id);
     }
 
     @Override
-    public User save(User user) {
-        return userRepository.save(user);
+    public ApplicationUser save(ApplicationUser applicationUser) {
+        return userRepository.save(applicationUser);
     }
 
     @Override
-    public User save(String name) {
-        User user = new User();
-        user.setUserName(name);
-        return userRepository.save(user);
+    public ApplicationUser save(String name) {
+        ApplicationUser applicationUser = new ApplicationUser();
+        applicationUser.setUserName(name);
+        return userRepository.save(applicationUser);
     }
 
     @Override
-    public void delete(User user) {
-        userRepository.delete(user);
+    public void delete(ApplicationUser applicationUser) {
+        userRepository.delete(applicationUser);
     }
 }
