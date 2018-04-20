@@ -1,7 +1,6 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
-
 import java.util.List;
 
 public interface VMPoolService {

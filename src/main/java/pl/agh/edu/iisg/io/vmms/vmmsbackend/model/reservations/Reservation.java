@@ -46,4 +46,13 @@ public abstract class Reservation {
     @NotNull
     @Min(0)
     private Integer machinesNumber;
+
+    @NotNull
+    private Boolean temporary;
+
+    @Column(columnDefinition = "TIMESTAMP")
+    private Date createDate;
+
+    @Column(columnDefinition = "TIMESTAMP")
+    private Date confirmDate;
 }
