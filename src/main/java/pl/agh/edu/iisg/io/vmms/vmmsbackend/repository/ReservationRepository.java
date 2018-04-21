@@ -3,7 +3,6 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Repository;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
@@ -19,8 +18,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query(value = "select r from Reservation as r " +
             "where ( r.confirmDate is not null or r.deadlineToConfirm > :nowDate ) " +
-            "and :fromDate < any ( select r.dates from r ) " +
-            "and :toDate > any ( select r.dates from r ) ")
+            "and :fromDate < any (select d from r.dates as d)" +
+            "and :toDate > any (select d from r.dates as d) ")
     List<Reservation> getAllValidByDatesBetween(
             @Param("nowDate") Date now,
             @Param("fromDate")Date from,
@@ -29,8 +28,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query(value = "select r from Reservation as r " +
             "where r.pool.shortName = :vmPoolShortName " +
             "and (r.confirmDate is not null or r.deadlineToConfirm > :nowDate) " +
-            "and :fromDate < any ( select r.dates from r ) " +
-            "and :toDate > any ( select r.dates from r ) ")
+            "and :fromDate < any ( select d from r.dates as d) " +
+            "and :toDate > any ( select d from r.dates as d) ")
     List<Reservation> getAllValidByDatesBetweenForVMPool(
             @Param("nowDate") Date now,
             @Param("fromDate") Date from,
@@ -40,15 +39,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query(value = "select r from Reservation as r " +
             "where r.pool = :vmPool "+
             "and (r.confirmDate is not null or r.deadlineToConfirm > :nowDate) " +
-            "and :date = any ( select r.dates from r ) ")
+            "and :date = any ( select d from r.dates as d ) ")
     List<Reservation> findAllValidByPoolAndDate(
             @Param("nowDate") Date nowDate,
             @Param("vmPool") VMPool pool,
             @Param("date") Date date);
 
-    @Query(nativeQuery = true, value = "insert into reservation_details (reservation_id, date) " +
-            "values (:id, :date)")
-    Reservation saveDateInReservation(
+    @Query(nativeQuery = true, value = "insert into reservations_details (reservation_id, date) " +
+            "values (:id, :date) " +
+            "returning (select r.id from reservation as r where r.id = :id)")
+    Long saveDateInReservation(
             @Param("id") Long reservationId,
             @Param("date") Date date);
 

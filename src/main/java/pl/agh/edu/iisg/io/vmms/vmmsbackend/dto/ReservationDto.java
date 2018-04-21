@@ -19,7 +19,7 @@ public class ReservationDto {
 
     private Long id;
 
-    private User owner;
+    private UserDto owner;
 
     private String courseName;
 

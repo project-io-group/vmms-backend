@@ -38,7 +38,6 @@ public abstract class Reservation {
     private VMPool pool;
 
     @Column(name = "date", columnDefinition = "TIMESTAMP")
-    @NotNull
     @ElementCollection
     @CollectionTable(
             name = "reservations_details",

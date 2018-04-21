@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.ReservationDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.ReservationResponseDto;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.UserDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.ReservationExpiredException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.HttpException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
@@ -146,6 +147,7 @@ public class ReservationController {
     private ReservationDto convertToDto(Reservation reservation){
         ReservationDto dto = modelMapper.map(reservation, ReservationDto.class);
         dto.setDates(reservation.getDates());
+        dto.setOwner(modelMapper.map(reservation.getOwner(), UserDto.class));
         return dto;
     }
 

@@ -100,6 +100,7 @@ public class ReservationServiceImpl implements ReservationService {
         ReservationResponse response = new ReservationResponse();
 
         List<Reservation> collidingReservations = new ArrayList<>();
+        List<Date> reservedDates = new ArrayList<>();
 
         for(Date date : reservation.getDates()){
             List<Reservation> collidingInDate = reservationRepository.findAllValidByPoolAndDate(
@@ -111,16 +112,18 @@ public class ReservationServiceImpl implements ReservationService {
             for(Reservation r: collidingInDate){
                 sumOfMachinesReserved += r.getMachinesNumber();
             }
-            if(collidingInDate.isEmpty() ||
-                    (sumOfMachinesReserved + reservation.getMachinesNumber())
+            if((sumOfMachinesReserved + reservation.getMachinesNumber())
                             <= reservation.getPool().getMaximumCount()){
-                reservation = reservationRepository.saveDateInReservation(reservation.getId(), date);
+                reservationRepository.saveDateInReservation(reservation.getId(), date);
+                reservedDates.add(date);
+
             }
             else{
                 collidingReservations.addAll(collidingInDate);
             }
         }
 
+        reservation.setDates(reservedDates);
         response.setCollisionsWithDesired(collidingReservations);
         response.setReservationMade(reservation);
         return response;
