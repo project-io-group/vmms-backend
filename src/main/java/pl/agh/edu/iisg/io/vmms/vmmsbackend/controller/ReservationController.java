@@ -113,7 +113,7 @@ public class ReservationController {
 
     @RequestMapping(path="/reservations/cyclic/create", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public ReservationResponseDto createRservation(
+    public ReservationResponseDto createReservation(
             @RequestParam("userId") Long userId,
             @RequestParam("vmPoolId") Long vmPoolId,
             @RequestParam("courseName") String courseName,
@@ -137,11 +137,26 @@ public class ReservationController {
         Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
         if(reservation.isPresent()) {
             reservationService.confirm(reservation.get());
+            deleteDatesFromReservation(reservationId, cancelledDates);
             return convertToDto(reservation.get());
         }
         else{
             throw new ReservationExpiredException();
         }
+    }
+
+    @RequestMapping(path="/reservations/delete", method = RequestMethod.DELETE)
+    public String deleteWholeReservation(
+            @RequestParam("reservationId") Long reservationId) {
+        return null;
+    }
+
+    @RequestMapping(path="/reservations/delete/dates", method = RequestMethod.DELETE)
+    public String deleteDatesFromReservation(
+            @RequestParam("reservationId") Long reservationId,
+            @RequestParam("cancelledDates") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") List<Date> cancelledDates)
+    {
+        return null;
     }
 
     private ReservationDto convertToDto(Reservation reservation){
