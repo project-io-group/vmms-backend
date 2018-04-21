@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.ReservationDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.ReservationResponseDto;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.ReservationExpiredException;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.HttpException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
@@ -20,7 +22,6 @@ import java.util.stream.Collectors;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping("/reservations")
 public class ReservationController {
 
     private final ReservationService  reservationService;
@@ -38,26 +39,50 @@ public class ReservationController {
         this.modelMapper = new ModelMapper();
     }
 
-    @RequestMapping(path = "/all", method = RequestMethod.GET)
+    @RequestMapping(path = "/reservations/all", method = RequestMethod.GET)
     public List<ReservationDto> getAllReservations(){
-        return reservationService.getReservations()
+        return reservationService.getConfirmedOrBeforeDeadlineToConfirmReservations()
                 .stream()
-                .map(reservation -> convertToDto(reservation))
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
-    @RequestMapping(path="/between", method = RequestMethod.GET)
+    @RequestMapping(path="/reservations/between", method = RequestMethod.GET)
     public List<ReservationDto> getReservationsBetweenDates(
             @RequestParam("from") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date from,
             @RequestParam("to") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date to){
         return reservationService
-                .getReservationsBetweenDates(from, to)
+                .getConfirmedOrBeforeDeadlineToConfirmReservationsBetweenDates(from, to)
                 .stream()
-                .map(reservation -> convertToDto(reservation))
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
-    @RequestMapping(path="/single/create", method = RequestMethod.POST)
+    @RequestMapping(path="/reservations/details", method = RequestMethod.GET)
+    public ReservationDto getReservationDetails(
+            @RequestParam("reservationId") Long id) throws HttpException{
+        Optional<Reservation> reservation = reservationService.find(id);
+        if(reservation.isPresent()){
+            return convertToDto(reservation.get());
+        }
+        else{
+            throw new ReservationExpiredException();
+        }
+    }
+
+    @RequestMapping(path="vm/{vmShortName}/between", method = RequestMethod.GET)
+    public List<ReservationDto> getReservationsBetweenDatesForVMPool(
+            @PathVariable("vmShortName") String vmPoolShortName,
+            @RequestParam("from") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date from,
+            @RequestParam("to") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date to){
+        return reservationService
+                .getConfirmedOrBeforeDeadlineToConfirmReservationsBetweenDatesForVMPool(vmPoolShortName, from, to)
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @RequestMapping(path="/reservations/single/create", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponseDto createReservation(
             @RequestParam("userId") Long userId,
@@ -72,13 +97,20 @@ public class ReservationController {
         return convertToDto(reservationResponse);
     }
 
-    @RequestMapping(path="/single/confirm", method = RequestMethod.PUT)
-    public String confirmSingleReservation(
-            @RequestParam("reservationId") Long reservationId){
-        return reservationService.confirm(reservationId);
+    @RequestMapping(path="/reservations/single/confirm", method = RequestMethod.PUT)
+    public ReservationDto confirmSingleReservation(
+            @RequestParam("reservationId") Long reservationId) throws ReservationExpiredException {
+        Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
+        if(reservation.isPresent()) {
+            reservationService.confirm(reservation.get());
+            return convertToDto(reservation.get());
+        }
+        else{
+            throw new ReservationExpiredException();
+        }
     }
 
-    @RequestMapping(path="/cyclic/create", method = RequestMethod.POST)
+    @RequestMapping(path="/reservations/cyclic/create", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponseDto createRservation(
             @RequestParam("userId") Long userId,
@@ -96,10 +128,19 @@ public class ReservationController {
         return convertToDto(reservationResponse);
     }
 
-    @RequestMapping(path="/cyclic/confirm", method = RequestMethod.PUT)
-    public String confirmCyclicReservation(
-            @RequestParam("reservationId") Long reservationId){
-        return reservationService.confirm(reservationId);
+    @RequestMapping(path="/reservations/cyclic/confirm", method = RequestMethod.PUT)
+    public ReservationDto confirmCyclicReservation(
+            @RequestParam("reservationId") Long reservationId,
+            @RequestParam("cancelledDates") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") List<Date> cancelledDates)
+            throws ReservationExpiredException {
+        Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
+        if(reservation.isPresent()) {
+            reservationService.confirm(reservation.get());
+            return convertToDto(reservation.get());
+        }
+        else{
+            throw new ReservationExpiredException();
+        }
     }
 
     private ReservationDto convertToDto(Reservation reservation){
@@ -110,13 +151,16 @@ public class ReservationController {
 
     private ReservationResponseDto convertToDto(ReservationResponse reservationResponse){
         ReservationResponseDto dto = new ReservationResponseDto();
-        dto.setReservationDto(convertToDto(reservationResponse.getReservation()));
+        dto.setReservationMade(convertToDto(reservationResponse.getReservationMade()));
         List<ReservationDto> collisions = reservationResponse
-                .getCollisions()
+                .getCollisionsWithDesired()
                 .stream()
-                .map(r -> convertToDto(reservationService.firstByDate(r)))
+                .map(d -> convertToDto(reservationService
+                        .getBiggestCollisionForDate(
+                                d,
+                                reservationResponse.getReservationMade().getPool())))
                 .collect(Collectors.toList());
-        dto.setCollisions(collisions);
+        dto.setCollisionsWithDesired(collisions);
         return dto;
     }
 }

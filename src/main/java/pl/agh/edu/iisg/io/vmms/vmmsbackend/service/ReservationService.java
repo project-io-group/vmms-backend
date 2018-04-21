@@ -7,12 +7,17 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationRespons
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface ReservationService {
 
-    List<Reservation> getReservationsBetweenDates(Date from, Date to);
+    List<Reservation> getConfirmedOrBeforeDeadlineToConfirmReservations();
 
-    List<Reservation> getReservations();
+    List<Reservation> getConfirmedOrBeforeDeadlineToConfirmReservationsBetweenDates(Date from, Date to);
+
+    Optional<Reservation> find(Long id);
+
+    List<Reservation> getConfirmedOrBeforeDeadlineToConfirmReservationsBetweenDatesForVMPool(String vmPoolShortName, Date from, Date to);
 
     ReservationResponse saveTemporarySingle(User user,
                                             VMPool vmPool,
@@ -26,11 +31,13 @@ public interface ReservationService {
                                             Integer machinesCount,
                                             Date from,
                                             Date to,
-                                            Integer intercal);
+                                            Integer interval);
 
-    Reservation find(Long id);
+    List<Date> findAllValidByPoolAndCollidingWithDates(Date now, VMPool pool, List<Date> dates);
 
-    Reservation firstByDate(Date date);
+    Optional<Reservation> findIfNotExpired(Long id);
 
-    String confirm(Long reservationId);
+    Reservation confirm(Reservation reservation);
+
+    Reservation getBiggestCollisionForDate(Date date, VMPool pool);
 }

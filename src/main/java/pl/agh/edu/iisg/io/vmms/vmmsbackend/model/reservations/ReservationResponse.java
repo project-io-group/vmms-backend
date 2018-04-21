@@ -9,6 +9,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class ReservationResponse {
-    Reservation reservation;
-    List<Date> collisions;
+    Reservation reservationMade;
+    List<Date> collisionsWithDesired;
 }

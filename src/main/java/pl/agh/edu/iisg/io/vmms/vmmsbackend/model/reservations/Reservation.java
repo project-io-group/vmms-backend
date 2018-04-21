@@ -20,6 +20,9 @@ import java.util.List;
 @DiscriminatorColumn(name = "reservation_type")
 public abstract class Reservation {
 
+    @Transient
+    public static final Integer EXPIRATION_TIME = 20*60;
+
     @Id
     @GeneratedValue
     private Long id;
@@ -47,12 +50,18 @@ public abstract class Reservation {
     @Min(0)
     private Integer machinesNumber;
 
-    @NotNull
-    private Boolean temporary;
-
     @Column(columnDefinition = "TIMESTAMP")
     private Date createDate;
 
     @Column(columnDefinition = "TIMESTAMP")
+    private Date deadlineToConfirm;
+
+    @Column(columnDefinition = "TIMESTAMP")
     private Date confirmDate;
+
+    public void setDeadlineToConfirmAccordingToDate(Date date){
+        Long createTime = date.getTime();
+        Long expirationTime = createTime + EXPIRATION_TIME;
+        deadlineToConfirm = new Date(expirationTime);
+    }
 }

@@ -2,6 +2,7 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,15 +19,16 @@ public class ReservationDto {
 
     private Long id;
 
-    private UserDto user;
+    private User owner;
 
     private String courseName;
 
     private VMPoolDto vmPool;
 
-    private Integer quantity;
+    private Integer machinesNumber;
 
     private List<String> dates;
+
 
     public List<Date> getDatesConverted() throws java.text.ParseException {
         dateFormat.setTimeZone(TimeZone.getDefault());

@@ -10,6 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 public class ReservationResponseDto {
 
-    ReservationDto reservationDto;
-    List<ReservationDto> collisions;
+    ReservationDto reservationMade;
+    List<ReservationDto> collisionsWithDesired;
 }
