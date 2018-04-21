@@ -33,11 +33,8 @@ public interface ReservationService {
                                             Date to,
                                             Integer interval);
 
-    List<Date> findAllValidByPoolAndCollidingWithDates(Date now, VMPool pool, List<Date> dates);
 
     Optional<Reservation> findIfNotExpired(Long id);
 
     Reservation confirm(Reservation reservation);
-
-    Reservation getBiggestCollisionForDate(Date date, VMPool pool);
 }

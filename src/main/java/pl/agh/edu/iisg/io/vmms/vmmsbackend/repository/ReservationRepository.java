@@ -15,43 +15,42 @@ import java.util.Optional;
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> getByConfirmDateNotNullOrDeadlineToConfirmBefore(Date now);
+    List<Reservation> getByConfirmDateNotNullOrDeadlineToConfirmAfter(Date now);
 
-    @Query(nativeQuery = true, value = "select r, d.date from reservation as r " +
-            "inner join reservations_details as d on r.id = d.reservation_id " +
-            "where (r.confirm_date is not null or r.deadline_to_confirm > :nowDate) " +
-            "and d.date between :fromDate and :toDate " +
-            "group by r.id ")
+    @Query(value = "select r from Reservation as r " +
+            "where ( r.confirmDate is not null or r.deadlineToConfirm > :nowDate ) " +
+            "and :fromDate < any ( select r.dates from r ) " +
+            "and :toDate > any ( select r.dates from r ) ")
     List<Reservation> getAllValidByDatesBetween(
             @Param("nowDate") Date now,
             @Param("fromDate")Date from,
             @Param("toDate")Date to);
 
-    @Query(nativeQuery = true, value = "select r, d.date from reservation as r" +
-            "inner join reservations_details as d on r.id = d.reservation_id " +
-            "inner join vmpool as p on r.pool_id = p.id " +
-            "where p.short_name = :vmPoolShortName " +
-            "and (r.confirm_date is not null or r.deadline_to_confirm > :nowDate) " +
-            "and d.date between :fromDate and :toDate " +
-            "group by r.id ")
+    @Query(value = "select r from Reservation as r " +
+            "where r.pool.shortName = :vmPoolShortName " +
+            "and (r.confirmDate is not null or r.deadlineToConfirm > :nowDate) " +
+            "and :fromDate < any ( select r.dates from r ) " +
+            "and :toDate > any ( select r.dates from r ) ")
     List<Reservation> getAllValidByDatesBetweenForVMPool(
             @Param("nowDate") Date now,
             @Param("fromDate") Date from,
             @Param("toDate")Date to,
             @Param("vmPoolShortName") String vmPoolShortName);
 
-    @Query(nativeQuery = true, value = "select d.date from reservation " +
-            "inner join reservations_details d on r.id = d.reservation_id " +
-            "where r.pool_id = :vmPool.getId() "+
-            "and (r.confirm_date is not null or r.deadline_to_confirm > :nowDate) " +
-            "and d.date in :dates " +
-            "group by d.date " +
-            "having sum(r.machines_number) > :vmPool.getMaximumCount() ")
-    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") List<Date>
-    findAllValidByPoolAndCollidingWithDates(
+    @Query(value = "select r from Reservation as r " +
+            "where r.pool = :vmPool "+
+            "and (r.confirmDate is not null or r.deadlineToConfirm > :nowDate) " +
+            "and :date = any ( select r.dates from r ) ")
+    List<Reservation> findAllValidByPoolAndDate(
             @Param("nowDate") Date nowDate,
             @Param("vmPool") VMPool pool,
-            @Param("dates") List<Date> dates);
+            @Param("date") Date date);
+
+    @Query(nativeQuery = true, value = "insert into reservation_details (reservation_id, date) " +
+            "values (:id, :date)")
+    Reservation saveDateInReservation(
+            @Param("id") Long reservationId,
+            @Param("date") Date date);
 
     Optional<Reservation> getAllByIdAndConfirmDateNotNullOrDeadlineToConfirmBefore(Long id, Date now);
 

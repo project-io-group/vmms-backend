@@ -10,5 +10,5 @@ import java.util.List;
 @NoArgsConstructor
 public class ReservationResponse {
     Reservation reservationMade;
-    List<Date> collisionsWithDesired;
+    List<Reservation> collisionsWithDesired;
 }

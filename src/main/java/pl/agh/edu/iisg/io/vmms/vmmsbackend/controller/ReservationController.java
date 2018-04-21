@@ -152,14 +152,12 @@ public class ReservationController {
     private ReservationResponseDto convertToDto(ReservationResponse reservationResponse){
         ReservationResponseDto dto = new ReservationResponseDto();
         dto.setReservationMade(convertToDto(reservationResponse.getReservationMade()));
-        List<ReservationDto> collisions = reservationResponse
-                .getCollisionsWithDesired()
+        List<ReservationDto> collisions =
+                reservationResponse.getCollisionsWithDesired()
                 .stream()
-                .map(d -> convertToDto(reservationService
-                        .getBiggestCollisionForDate(
-                                d,
-                                reservationResponse.getReservationMade().getPool())))
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
+
         dto.setCollisionsWithDesired(collisions);
         return dto;
     }

@@ -35,7 +35,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public List<Reservation> getConfirmedOrBeforeDeadlineToConfirmReservations(){
         return reservationRepository
-                .getByConfirmDateNotNullOrDeadlineToConfirmBefore(new Date());
+                .getByConfirmDateNotNullOrDeadlineToConfirmAfter(new Date());
     }
 
     @Override
@@ -63,13 +63,15 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setCourseName(courseName);
         reservation.setMachinesNumber(machinesCount);
 
-        List<Date> dates = new ArrayList<>();
-        dates.add(date);
-        reservation.setDates(dates);
-
         Date createDate = new Date();
         reservation.setCreateDate(createDate);
         reservation.setDeadlineToConfirmAccordingToDate(createDate);
+
+        reservationRepository.save(reservation);
+
+        List<Date> dates = new ArrayList<>();
+        dates.add(date);
+        reservation.setDates(dates);
 
         return saveTemporary(reservation);
     }
@@ -82,11 +84,13 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setCourseName(courseName);
         reservation.setMachinesNumber(machinesCount);
 
-        ((CyclicReservation) reservation).setDates(from, to, Period.of(0,0,interval));
-
         Date createDate = new Date();
         reservation.setCreateDate(createDate);
         reservation.setDeadlineToConfirmAccordingToDate(createDate);
+
+        reservationRepository.save(reservation);
+
+        ((CyclicReservation) reservation).setDates(from, to, Period.of(0,0,interval));
 
         return saveTemporary(reservation);
     }
@@ -94,26 +98,32 @@ public class ReservationServiceImpl implements ReservationService {
     private ReservationResponse saveTemporary(Reservation reservation){
 
         ReservationResponse response = new ReservationResponse();
-        List<Date> collisionDates = reservationRepository
-                .findAllValidByPoolAndCollidingWithDates(
-                        reservation.getCreateDate(), reservation.getPool(), reservation.getDates());
 
-        List<Date> reservationDates = reservation.getDates();
-        reservationDates.removeAll(collisionDates);
+        List<Reservation> collidingReservations = new ArrayList<>();
 
-        response.setCollisionsWithDesired(collisionDates);
+        for(Date date : reservation.getDates()){
+            List<Reservation> collidingInDate = reservationRepository.findAllValidByPoolAndDate(
+                    reservation.getCreateDate(),
+                    reservation.getPool(),
+                    date
+                    );
+            Integer sumOfMachinesReserved = 0;
+            for(Reservation r: collidingInDate){
+                sumOfMachinesReserved += r.getMachinesNumber();
+            }
+            if(collidingInDate.isEmpty() ||
+                    (sumOfMachinesReserved + reservation.getMachinesNumber())
+                            <= reservation.getPool().getMaximumCount()){
+                reservation = reservationRepository.saveDateInReservation(reservation.getId(), date);
+            }
+            else{
+                collidingReservations.addAll(collidingInDate);
+            }
+        }
 
-        reservation.setDates(reservationDates);
-        reservationRepository.save(reservation);
-
+        response.setCollisionsWithDesired(collidingReservations);
         response.setReservationMade(reservation);
         return response;
-    }
-
-    @Override
-    public List<Date> findAllValidByPoolAndCollidingWithDates(Date now, VMPool pool, List<Date> dates){
-        return reservationRepository.
-                findAllValidByPoolAndCollidingWithDates(now, pool, dates);
     }
 
     @Override
@@ -127,13 +137,5 @@ public class ReservationServiceImpl implements ReservationService {
 
         reservation.setConfirmDate(new Date());
         return reservationRepository.save(reservation);
-    }
-
-    @Override
-    public Reservation getBiggestCollisionForDate(Date date, VMPool pool){
-        List<Date> dates = new ArrayList<>();
-        dates.add(date);
-        return reservationRepository
-                .getTopByDatesContainingAndPoolAndConfirmDateNotNullOrDeadlineToConfirmBeforeOrderByMachinesNumberDesc(dates, pool, new Date());
     }
 }
