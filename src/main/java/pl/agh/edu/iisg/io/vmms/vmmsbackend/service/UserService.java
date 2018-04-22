@@ -15,7 +15,7 @@ public interface UserService {
 
     User save(User user);
 
-    User save(String name);
+    User save(String name, Boolean isAdmin);
 
     void delete(User user);
 }
