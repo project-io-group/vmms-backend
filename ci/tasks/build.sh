@@ -53,6 +53,8 @@ sanitize_cgroups() {
   fi
 }
 
+sanitize_cgroups
+
 dockerd & docker-compose up -d
 
 ./gradlew clean build
