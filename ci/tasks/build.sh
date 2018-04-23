@@ -46,7 +46,12 @@ sanitize_cgroups() {
 
       ln -s "$mountpoint" "/sys/fs/cgroup/$sys"
     fi
-done
+  done
+  if ! test -e /sys/fs/cgroup/systemd ; then
+    mkdir /sys/fs/cgroup/systemd
+    mount -t cgroup -o none,name=systemd none /sys/fs/cgroup/systemd
+  fi
+}
 
 dockerd & docker-compose up -d
 
