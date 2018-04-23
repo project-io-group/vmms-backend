@@ -30,9 +30,8 @@ public class CyclicReservation extends Reservation {
         LocalDate end = convertToLocal(endDateExclusive);
 
         Stream<Date> cyclicDates = Stream.iterate(start, date -> date.plus(cycleInterval))
-                .limit(
-                        ChronoUnit.DAYS.between(start, end) / cycleInterval.getDays()
-                ).map(date ->
+                .limit(ChronoUnit.DAYS.between(start, end) / cycleInterval.getDays())
+                .map(date ->
                         Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant())
                 );
 

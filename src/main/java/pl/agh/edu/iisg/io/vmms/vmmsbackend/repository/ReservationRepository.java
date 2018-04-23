@@ -14,10 +14,10 @@ import java.util.Optional;
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> getByConfirmDateNotNullOrDeadlineToConfirmAfter(Date now);
+    List<Reservation> getByConfirmationDateNotNullOrDeadlineToConfirmAfter(Date now);
 
     @Query(value = "select r from Reservation as r " +
-            "where ( r.confirmDate is not null or r.deadlineToConfirm > :nowDate ) " +
+            "where ( r.confirmationDate is not null or r.deadlineToConfirm > :nowDate ) " +
             "and :fromDate < any (select d from r.dates as d)" +
             "and :toDate > any (select d from r.dates as d) ")
     List<Reservation> getAllValidByDatesBetween(
@@ -27,7 +27,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query(value = "select r from Reservation as r " +
             "where r.pool.shortName = :vmPoolShortName " +
-            "and (r.confirmDate is not null or r.deadlineToConfirm > :nowDate) " +
+            "and (r.confirmationDate is not null or r.deadlineToConfirm > :nowDate) " +
             "and :fromDate < any ( select d from r.dates as d) " +
             "and :toDate > any ( select d from r.dates as d) ")
     List<Reservation> getAllValidByDatesBetweenForVMPool(
@@ -38,7 +38,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query(value = "select r from Reservation as r " +
             "where r.pool = :vmPool "+
-            "and (r.confirmDate is not null or r.deadlineToConfirm > :nowDate) " +
+            "and (r.confirmationDate is not null or r.deadlineToConfirm > :nowDate) " +
             "and :date = any ( select d from r.dates as d ) ")
     List<Reservation> findAllValidByPoolAndDate(
             @Param("nowDate") Date nowDate,
@@ -52,7 +52,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("id") Long reservationId,
             @Param("date") Date date);
 
-    Optional<Reservation> getAllByIdAndConfirmDateNotNullOrDeadlineToConfirmBefore(Long id, Date now);
+    Optional<Reservation> getAllByIdAndConfirmationDateNotNullOrDeadlineToConfirmAfter(Long id, Date now);
 
-    Reservation getTopByDatesContainingAndPoolAndConfirmDateNotNullOrDeadlineToConfirmBeforeOrderByMachinesNumberDesc(List<Date> dates, VMPool pool, Date now);
+    Reservation getTopByDatesContainingAndPoolAndConfirmationDateNotNullOrDeadlineToConfirmBeforeOrderByMachinesNumberDesc(List<Date> dates, VMPool pool, Date now);
 }

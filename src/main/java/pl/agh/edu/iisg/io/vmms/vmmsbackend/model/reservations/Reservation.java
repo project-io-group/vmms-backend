@@ -56,11 +56,11 @@ public abstract class Reservation {
     private Date deadlineToConfirm;
 
     @Column(columnDefinition = "TIMESTAMP")
-    private Date confirmDate;
+    private Date confirmationDate;
 
-    public void setDeadlineToConfirmAccordingToDate(Date date){
-        Long createTime = date.getTime();
-        Long expirationTime = createTime + EXPIRATION_TIME;
+    public void setDeadlineToConfirmAccordingToCreationTime(Date date){
+        Long creationTime = date.getTime();
+        Long expirationTime = creationTime + EXPIRATION_TIME;
         deadlineToConfirm = new Date(expirationTime);
     }
 }

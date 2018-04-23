@@ -35,7 +35,7 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public List<Reservation> getConfirmedOrBeforeDeadlineToConfirmReservations(){
         return reservationRepository
-                .getByConfirmDateNotNullOrDeadlineToConfirmAfter(new Date());
+                .getByConfirmationDateNotNullOrDeadlineToConfirmAfter(new Date());
     }
 
     @Override
@@ -65,7 +65,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         Date createDate = new Date();
         reservation.setCreateDate(createDate);
-        reservation.setDeadlineToConfirmAccordingToDate(createDate);
+        reservation.setDeadlineToConfirmAccordingToCreationTime(createDate);
 
         reservationRepository.save(reservation);
 
@@ -86,7 +86,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         Date createDate = new Date();
         reservation.setCreateDate(createDate);
-        reservation.setDeadlineToConfirmAccordingToDate(createDate);
+        reservation.setDeadlineToConfirmAccordingToCreationTime(createDate);
 
         reservationRepository.save(reservation);
 
@@ -116,7 +116,6 @@ public class ReservationServiceImpl implements ReservationService {
                             <= reservation.getPool().getMaximumCount()){
                 reservationRepository.saveDateInReservation(reservation.getId(), date);
                 reservedDates.add(date);
-
             }
             else{
                 collidingReservations.addAll(collidingInDate);
@@ -132,13 +131,13 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public Optional<Reservation> findIfNotExpired(Long id) {
         return reservationRepository
-                .getAllByIdAndConfirmDateNotNullOrDeadlineToConfirmBefore(id, new Date());
+                .getAllByIdAndConfirmationDateNotNullOrDeadlineToConfirmAfter(id, new Date());
     }
 
     @Override
     public Reservation confirm(Reservation reservation){
 
-        reservation.setConfirmDate(new Date());
+        reservation.setConfirmationDate(new Date());
         return reservationRepository.save(reservation);
     }
 }
