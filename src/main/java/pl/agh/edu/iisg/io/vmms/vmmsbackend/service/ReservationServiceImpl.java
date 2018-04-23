@@ -140,4 +140,9 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setConfirmationDate(new Date());
         return reservationRepository.save(reservation);
     }
+
+    @Override
+    public void delete(Reservation reservation) {
+        reservationRepository.delete(reservation);
+    }
 }

@@ -25,6 +25,8 @@ option -d is for running in the background
 ### Connecting to the database:
 `docker exec -it vmmsbackend_db_1 psql -h localhost -p 5432 -U vmms_app vmms`
 
+Parameters for connecting with external software can be read from `docker-compose.yml`
+
 ### Manually inserting to database after connection:
 `insert into users(id, user_name) values (1, 'ala');`
 
@@ -41,4 +43,4 @@ option -d is for running in the background
 `http://localhost:9045/vm/tag/some_tag` (list all with some_tag in description)   
 
 ### You can import pcoips (pcoip_pools.csv) with:
-`curl -i -X POST -F "file=@path_to_file" http://localhost:9045/vm/import`
+`curl -i -X POST -F "file=@pcoip_pools.csv" http://localhost:9045/vm/import`

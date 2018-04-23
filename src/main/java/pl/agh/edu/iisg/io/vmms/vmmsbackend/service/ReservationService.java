@@ -37,4 +37,6 @@ public interface ReservationService {
     Optional<Reservation> findIfNotExpired(Long id);
 
     Reservation confirm(Reservation reservation);
+
+    void delete(Reservation reservation);
 }
