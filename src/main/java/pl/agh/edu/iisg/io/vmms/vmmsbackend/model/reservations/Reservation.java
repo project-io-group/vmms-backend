@@ -9,6 +9,7 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 
@@ -21,7 +22,7 @@ import java.util.List;
 public abstract class Reservation {
 
     @Transient
-    public static final Integer EXPIRATION_TIME = 20*60;
+    public static final Duration EXPIRATION_TIME = Duration.ofMinutes(20);
 
     @Id
     @GeneratedValue
@@ -58,9 +59,7 @@ public abstract class Reservation {
     @Column(columnDefinition = "TIMESTAMP")
     private Date confirmDate;
 
-    public void setDeadlineToConfirmAccordingToDate(Date date){
-        Long createTime = date.getTime();
-        Long expirationTime = createTime + EXPIRATION_TIME;
-        deadlineToConfirm = new Date(expirationTime);
+    public void setDeadlineToConfirmAccordingToDate(Date date) {
+        deadlineToConfirm = Date.from(date.toInstant().plus(EXPIRATION_TIME));
     }
 }
