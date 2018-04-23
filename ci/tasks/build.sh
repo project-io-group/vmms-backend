@@ -6,7 +6,7 @@ cd sourcecode
 #
 #export DOCKER_HOST=127.0.0.1:54321
 
-docker run -v /var/run/docker.sock:/var/run/docker.sock & docker-compose up -d
+dockerd -H unix:///var/run/docker.sock & docker-compose up -d
 
 ./gradlew clean build
 
