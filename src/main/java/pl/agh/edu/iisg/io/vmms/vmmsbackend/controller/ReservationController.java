@@ -28,14 +28,14 @@ import java.util.stream.Collectors;
 @RestController
 public class ReservationController {
 
-    private final ReservationService  reservationService;
+    private final ReservationService reservationService;
     private final UserService userService;
     private final VMPoolService vmPoolService;
     private final ModelMapper modelMapper;
 
     @Autowired
     public ReservationController(ReservationService reservationService,
-                                 UserService userService, VMPoolService vmPoolService){
+                                 UserService userService, VMPoolService vmPoolService) {
         this.reservationService = reservationService;
         this.userService = userService;
         this.vmPoolService = vmPoolService;
@@ -44,17 +44,17 @@ public class ReservationController {
     }
 
     @RequestMapping(path = "/reservations/all", method = RequestMethod.GET)
-    public List<ReservationDto> getAllReservations(){
+    public List<ReservationDto> getAllReservations() {
         return reservationService.getConfirmedOrBeforeDeadlineToConfirmReservations()
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
-    @RequestMapping(path="/reservations/between", method = RequestMethod.GET)
+    @RequestMapping(path = "/reservations/between", method = RequestMethod.GET)
     public List<ReservationDto> getReservationsBetweenDates(
-            @RequestParam("from") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date from,
-            @RequestParam("to") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date to){
+            @RequestParam("from") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date from,
+            @RequestParam("to") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date to) {
         return reservationService
                 .getConfirmedOrBeforeDeadlineToConfirmReservationsBetweenDates(from, to)
                 .stream()
@@ -62,23 +62,22 @@ public class ReservationController {
                 .collect(Collectors.toList());
     }
 
-    @RequestMapping(path="/reservations/details", method = RequestMethod.GET)
+    @RequestMapping(path = "/reservations/details", method = RequestMethod.GET)
     public ReservationDto getReservationDetails(
-            @RequestParam("reservationId") Long id) throws HttpException{
+            @RequestParam("reservationId") Long id) throws HttpException {
         Optional<Reservation> reservation = reservationService.find(id);
-        if(reservation.isPresent()){
+        if (reservation.isPresent()) {
             return convertToDto(reservation.get());
-        }
-        else{
+        } else {
             throw new ReservationExpiredException();
         }
     }
 
-    @RequestMapping(path="vm/{vmShortName}/between", method = RequestMethod.GET)
+    @RequestMapping(path = "vm/{vmShortName}/between", method = RequestMethod.GET)
     public List<ReservationDto> getReservationsBetweenDatesForVMPool(
             @PathVariable("vmShortName") String vmPoolShortName,
-            @RequestParam("from") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date from,
-            @RequestParam("to") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date to){
+            @RequestParam("from") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date from,
+            @RequestParam("to") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date to) {
         return reservationService
                 .getConfirmedOrBeforeDeadlineToConfirmReservationsBetweenDatesForVMPool(vmPoolShortName, from, to)
                 .stream()
@@ -86,14 +85,14 @@ public class ReservationController {
                 .collect(Collectors.toList());
     }
 
-    @RequestMapping(path="/reservations/single/create", method = RequestMethod.POST)
+    @RequestMapping(path = "/reservations/single/create", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponseDto createReservation(
             @RequestParam("userId") Long userId,
             @RequestParam("vmPoolId") Long vmPoolId,
             @RequestParam("courseName") String courseName,
             @RequestParam("machinesCount") Integer machinesCount,
-            @RequestParam("date") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date date){
+            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date date) {
         User user = userService.find(userId);
         VMPool vmPool = vmPoolService.find(vmPoolId);
         ReservationResponse reservationResponse = reservationService
@@ -101,54 +100,52 @@ public class ReservationController {
         return convertToDto(reservationResponse);
     }
 
-    @RequestMapping(path="/reservations/single/confirm", method = RequestMethod.PUT)
+    @RequestMapping(path = "/reservations/single/confirm", method = RequestMethod.PUT)
     public ReservationDto confirmSingleReservation(
             @RequestParam("reservationId") Long reservationId) throws ReservationExpiredException {
         Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
-        if(reservation.isPresent()) {
+        if (reservation.isPresent()) {
             reservationService.confirm(reservation.get());
             return convertToDto(reservation.get());
-        }
-        else{
+        } else {
             throw new ReservationExpiredException();
         }
     }
 
-    @RequestMapping(path="/reservations/cyclic/create", method = RequestMethod.POST)
+    @RequestMapping(path = "/reservations/cyclic/create", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponseDto createReservation(
             @RequestParam("userId") Long userId,
             @RequestParam("vmPoolId") Long vmPoolId,
             @RequestParam("courseName") String courseName,
             @RequestParam("machinesCount") Integer machinesCount,
-            @RequestParam("from") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date from,
-            @RequestParam("to") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date to,
+            @RequestParam("from") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date from,
+            @RequestParam("to") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date to,
             @RequestParam("interval") Integer interval) {
         User user = userService.find(userId);
         VMPool vmPool = vmPoolService.find(vmPoolId);
         ReservationResponse reservationResponse = reservationService
                 .saveTemporaryCyclic(user, vmPool, courseName, machinesCount,
-                from, to, interval);
+                        from, to, interval);
         return convertToDto(reservationResponse);
     }
 
-    @RequestMapping(path="/reservations/cyclic/confirm", method = RequestMethod.PUT)
+    @RequestMapping(path = "/reservations/cyclic/confirm", method = RequestMethod.PUT)
     public ReservationDto confirmCyclicReservation(
             @RequestParam("reservationId") Long reservationId,
-            @RequestParam("cancelledDates") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") List<Date> cancelledDates)
+            @RequestParam("cancelledDates") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") List<Date> cancelledDates)
             throws ReservationExpiredException, ReservationNotFoundException, ReservationDateNotFoundException {
         Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
-        if(reservation.isPresent()) {
+        if (reservation.isPresent()) {
             reservationService.confirm(reservation.get());
             deleteDatesFromReservation(reservationId, cancelledDates);
             return convertToDto(reservation.get());
-        }
-        else{
+        } else {
             throw new ReservationExpiredException();
         }
     }
 
-    @RequestMapping(path="/reservations/delete", method = RequestMethod.DELETE)
+    @RequestMapping(path = "/reservations/delete", method = RequestMethod.DELETE)
     public String deleteWholeReservation(
             @RequestParam("reservationId") Long reservationId) throws ReservationNotFoundException {
         Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
@@ -161,10 +158,10 @@ public class ReservationController {
         }
     }
 
-    @RequestMapping(path="/reservations/delete/dates", method = RequestMethod.DELETE)
+    @RequestMapping(path = "/reservations/delete/dates", method = RequestMethod.DELETE)
     public String deleteDatesFromReservation ( // TODO: Find out if it works.
             @RequestParam("reservationId") Long reservationId,
-            @RequestParam("cancelledDates") @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") List<Date> cancelledDates) throws ReservationNotFoundException, ReservationDateNotFoundException
+            @RequestParam("cancelledDates") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") List<Date> cancelledDates) throws ReservationNotFoundException, ReservationDateNotFoundException
     {
         Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
         if(reservation.isPresent()) {
@@ -189,21 +186,21 @@ public class ReservationController {
         }
     }
 
-    private ReservationDto convertToDto(Reservation reservation){
+    private ReservationDto convertToDto(Reservation reservation) {
         ReservationDto dto = modelMapper.map(reservation, ReservationDto.class);
         dto.setDates(reservation.getDates());
         dto.setOwner(modelMapper.map(reservation.getOwner(), UserDto.class));
         return dto;
     }
 
-    private ReservationResponseDto convertToDto(ReservationResponse reservationResponse){
+    private ReservationResponseDto convertToDto(ReservationResponse reservationResponse) {
         ReservationResponseDto dto = new ReservationResponseDto();
         dto.setReservationMade(convertToDto(reservationResponse.getReservationMade()));
         List<ReservationDto> collisions =
                 reservationResponse.getCollisionsWithDesired()
-                .stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+                        .stream()
+                        .map(this::convertToDto)
+                        .collect(Collectors.toList());
 
         dto.setCollisionsWithDesired(collisions);
         return dto;
