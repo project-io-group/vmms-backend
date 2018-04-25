@@ -5,9 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.ReservationDto;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.ReservationResponseDto;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.UserDto;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.*;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.ReservationDateNotFoundException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.ReservationExpiredException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.ReservationNotFoundException;
@@ -28,6 +26,13 @@ import java.util.stream.Collectors;
 @RestController
 public class ReservationController {
 
+    private static final String RESERVATIONS_ENDPOINT = "/reservations";
+    private static final String RESERVATIONS_IN_PERIOD_ENDPOINT = "/reservations/between";
+    private static final String RESERVATION_ENDPOINT = "/reservation";
+    private static final String CONFIRM_TMP_ENDPOINT = "/reservation/confirm";
+    private static final String CANCEL_TMP_ENDPOINT = "/reservation/cancel";
+    private static final String DELETE_DATES_FROM_RESERVATION_ENDPOINT = "/reservation/dates";
+
     private final ReservationService reservationService;
     private final UserService userService;
     private final VMPoolService vmPoolService;
@@ -43,16 +48,18 @@ public class ReservationController {
         this.modelMapper = new ModelMapper();
     }
 
-    @RequestMapping(path = "/reservations/all", method = RequestMethod.GET)
-    public List<ReservationDto> getAllReservations() {
+    @RequestMapping(path = RESERVATIONS_ENDPOINT, method = RequestMethod.GET)
+    public List<ReservationDto> getReservationsForUser(
+            @RequestParam("userId") Long userId) {
         return reservationService.getConfirmedOrBeforeDeadlineToConfirmReservations()
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
-    @RequestMapping(path = "/reservations/between", method = RequestMethod.GET)
-    public List<ReservationDto> getReservationsBetweenDates(
+    @RequestMapping(path = RESERVATIONS_IN_PERIOD_ENDPOINT, method = RequestMethod.GET)
+    public List<ReservationDto> getReservationsBetweenDatesForUser(
+            @RequestParam("userId") Long userId,
             @RequestParam("from") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date from,
             @RequestParam("to") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date to) {
         return reservationService
@@ -60,17 +67,6 @@ public class ReservationController {
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
-    }
-
-    @RequestMapping(path = "/reservations/details", method = RequestMethod.GET)
-    public ReservationDto getReservationDetails(
-            @RequestParam("reservationId") Long id) throws HttpException {
-        Optional<Reservation> reservation = reservationService.find(id);
-        if (reservation.isPresent()) {
-            return convertToDto(reservation.get());
-        } else {
-            throw new ReservationExpiredException();
-        }
     }
 
     @RequestMapping(path = "vm/{vmShortName}/between", method = RequestMethod.GET)
@@ -85,68 +81,55 @@ public class ReservationController {
                 .collect(Collectors.toList());
     }
 
-    @RequestMapping(path = "/reservations/single/create", method = RequestMethod.POST)
-    @ResponseStatus(HttpStatus.CREATED)
-    public ReservationResponseDto createReservation(
-            @RequestParam("userId") Long userId,
-            @RequestParam("vmPoolId") Long vmPoolId,
-            @RequestParam("courseName") String courseName,
-            @RequestParam("machinesCount") Integer machinesCount,
-            @RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date date) {
-        User user = userService.find(userId);
-        VMPool vmPool = vmPoolService.find(vmPoolId);
-        ReservationResponse reservationResponse = reservationService
-                .saveTemporarySingle(user, vmPool, courseName, machinesCount, date);
-        return convertToDto(reservationResponse);
+    @RequestMapping(path = RESERVATION_ENDPOINT, method = RequestMethod.GET)
+    public ReservationDto getReservation(
+            @RequestParam("reservationId") Long id) throws HttpException {
+        Optional<Reservation> reservation = reservationService.find(id);
+        if (reservation.isPresent()) {
+            return convertToDto(reservation.get());
+        } else {
+            throw new ReservationExpiredException();
+        }
     }
 
-    @RequestMapping(path = "/reservations/single/confirm", method = RequestMethod.PUT)
-    public ReservationDto confirmSingleReservation(
+    @RequestMapping(path = RESERVATION_ENDPOINT, method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.CREATED)
+    public Long createReservation(
+            @RequestParam("reservation")ReservationRequestDto reservation) {
+        User user = userService.find(reservation.getUserId());
+        VMPool vmPool = vmPoolService.find(reservation.getVmPoolId());
+        ReservationResponse reservationResponse = reservationService
+                .saveTemporarySingle(user, vmPool, reservation.getCourseName(),
+                        reservation.getMachinesNumber(), reservation.getDates().get(0).getStartDate());
+        return reservationResponse.getReservationMade().getId();
+    }
+
+    @RequestMapping(path = CONFIRM_TMP_ENDPOINT, method = RequestMethod.PUT)
+    public String confirmReservation(
             @RequestParam("reservationId") Long reservationId) throws ReservationExpiredException {
         Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
         if (reservation.isPresent()) {
             reservationService.confirm(reservation.get());
-            return convertToDto(reservation.get());
+            return "CONFIRMED";
         } else {
             throw new ReservationExpiredException();
         }
     }
 
-    @RequestMapping(path = "/reservations/cyclic/create", method = RequestMethod.POST)
-    @ResponseStatus(HttpStatus.CREATED)
-    public ReservationResponseDto createReservation(
-            @RequestParam("userId") Long userId,
-            @RequestParam("vmPoolId") Long vmPoolId,
-            @RequestParam("courseName") String courseName,
-            @RequestParam("machinesCount") Integer machinesCount,
-            @RequestParam("from") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date from,
-            @RequestParam("to") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") Date to,
-            @RequestParam("interval") Integer interval) {
-        User user = userService.find(userId);
-        VMPool vmPool = vmPoolService.find(vmPoolId);
-        ReservationResponse reservationResponse = reservationService
-                .saveTemporaryCyclic(user, vmPool, courseName, machinesCount,
-                        from, to, interval);
-        return convertToDto(reservationResponse);
-    }
-
-    @RequestMapping(path = "/reservations/cyclic/confirm", method = RequestMethod.PUT)
-    public ReservationDto confirmCyclicReservation(
-            @RequestParam("reservationId") Long reservationId,
-            @RequestParam("cancelledDates") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") List<Date> cancelledDates)
-            throws ReservationExpiredException, ReservationNotFoundException, ReservationDateNotFoundException {
-        Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
+    @RequestMapping(path = CANCEL_TMP_ENDPOINT, method = RequestMethod.DELETE)
+    public String cancelReservation(
+            @RequestParam("reservationId") Long reservationId) throws ReservationExpiredException {
+        Optional<Reservation> reservation = reservationService.find(reservationId);
         if (reservation.isPresent()) {
-            reservationService.confirm(reservation.get());
-            deleteDatesFromReservation(reservationId, cancelledDates);
-            return convertToDto(reservation.get());
+            reservationService.delete(reservation.get());
+            return "CANCELED";
         } else {
             throw new ReservationExpiredException();
         }
     }
 
-    @RequestMapping(path = "/reservations/delete", method = RequestMethod.DELETE)
-    public String deleteWholeReservation(
+    @RequestMapping(path = RESERVATION_ENDPOINT, method = RequestMethod.DELETE)
+    public String deleteReservation(
             @RequestParam("reservationId") Long reservationId) throws ReservationNotFoundException {
         Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
         if(reservation.isPresent()) {
@@ -158,23 +141,23 @@ public class ReservationController {
         }
     }
 
-    @RequestMapping(path = "/reservations/delete/dates", method = RequestMethod.DELETE)
+    @RequestMapping(path = DELETE_DATES_FROM_RESERVATION_ENDPOINT, method = RequestMethod.DELETE)
     public String deleteDatesFromReservation ( // TODO: Find out if it works.
             @RequestParam("reservationId") Long reservationId,
-            @RequestParam("cancelledDates") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm") List<Date> cancelledDates) throws ReservationNotFoundException, ReservationDateNotFoundException
+            @RequestParam("cancelledDates") List<ReservationPeriodDto> cancelledDates) throws ReservationNotFoundException, ReservationDateNotFoundException
     {
         Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
         if(reservation.isPresent()) {
             Reservation extractedReservation = reservation.get();
             if(extractedReservation instanceof SingleReservation){
-                if(extractedReservation.getDates().equals(cancelledDates)) return deleteWholeReservation(extractedReservation.getId());
+                if(extractedReservation.getDates().equals(cancelledDates)) return deleteReservation(extractedReservation.getId());
                 else throw new ReservationDateNotFoundException();
             } else {
                 List<Date> processedDates = extractedReservation.getDates();
-                for (Date date: cancelledDates){
+                for (ReservationPeriodDto date: cancelledDates){
                     if (!processedDates.contains(date)) throw new ReservationDateNotFoundException();
                 }
-                for (Date date: cancelledDates){
+                for (ReservationPeriodDto date: cancelledDates){
                     processedDates.remove(date);
                 }
                 extractedReservation.setDates(processedDates);
