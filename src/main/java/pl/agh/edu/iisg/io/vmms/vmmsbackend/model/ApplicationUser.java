@@ -25,4 +25,6 @@ public class ApplicationUser {
     @NotNull
     private String password;
 
+    @NotNull
+    private String email;
 }

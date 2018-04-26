@@ -4,6 +4,8 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.user.UserLoginRequestDto;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.user.UserSignUpRequestDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.HttpException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.MissingUserIdException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.UserNotFoundException;
@@ -47,10 +49,18 @@ public class UserController {
     }
 
     @PostMapping(SecurityConstants.SIGN_UP_URL)
-    @ResponseStatus(HttpStatus.CREATED)
-    public void signUp(@RequestBody ApplicationUser applicationUser) {
-        applicationUser.setPassword(bCryptPasswordEncoder.encode(applicationUser.getPassword()));
+    public void signUp(@RequestBody UserSignUpRequestDto registerRequest) {
+        ApplicationUser applicationUser = new ApplicationUser();
+        applicationUser.setUserName(registerRequest.getFullName());
+        applicationUser.setEmail(registerRequest.getEmail());
+        applicationUser.setPassword(bCryptPasswordEncoder.encode(registerRequest.getPassword()));
+
         userService.save(applicationUser);
+    }
+
+    @PostMapping(SecurityConstants.LOGIN_URL)
+    public void login(@RequestBody UserLoginRequestDto loginRequest) {
+        //TODO implement the logic of signing in (loginRequest have all JSON fields)
     }
 
     @RequestMapping(path = "/user/create", method = RequestMethod.POST)
