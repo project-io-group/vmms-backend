@@ -12,14 +12,14 @@ import javax.validation.constraints.NotNull;
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
 @NoArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "reservation_type")
-public abstract class Reservation {
+
+public class Reservation {
 
     @Transient
     public static final Duration EXPIRATION_TIME = Duration.ofMinutes(20);
@@ -38,13 +38,8 @@ public abstract class Reservation {
     @JoinColumn(name = "poolId")
     private VMPool pool;
 
-    @Column(name = "date", columnDefinition = "TIMESTAMP")
-    @ElementCollection
-    @CollectionTable(
-            name = "reservations_details",
-            joinColumns = @JoinColumn(name = "reservationId")
-    )
-    private List<Date> dates;
+    @OneToMany(mappedBy = "reservation")
+    private Set<ReservationPeriod> periods;
 
     @NotNull
     @Min(0)
@@ -61,5 +56,13 @@ public abstract class Reservation {
 
     public void setDeadlineToConfirmAccordingToCreationTime(Date date) {
         deadlineToConfirm = Date.from(date.toInstant().plus(EXPIRATION_TIME));
+    }
+
+    public void addPeriod(ReservationPeriod period){
+        this.periods.add(period);
+    }
+
+    public void removePeriod(ReservationPeriod period){
+        this.periods.remove(period);
     }
 }

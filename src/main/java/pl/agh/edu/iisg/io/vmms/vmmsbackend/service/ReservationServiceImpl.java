@@ -2,16 +2,14 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.ReservationRequestDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.CyclicReservation;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationResponse;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.SingleReservation;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.ReservationPeriodRepository;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.ReservationRepository;
 
-import java.time.Period;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -50,75 +48,28 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public ReservationResponse saveTemporarySingle(User user, VMPool vmPool, String courseName, Integer machinesCount, Date date) {
-        Reservation reservation = new SingleReservation();
-        reservation.setOwner(user);
-        reservation.setPool(vmPool);
-        reservation.setCourseName(courseName);
-        reservation.setMachinesNumber(machinesCount);
+    public Long saveTemporary(Reservation reservation,
+                              Date startTime,
+                              Date endTime,
+                              List<Date> days) {
 
-        Date createDate = new Date();
-        reservation.setCreateDate(createDate);
-        reservation.setDeadlineToConfirmAccordingToCreationTime(createDate);
+        Date now = new Date();
+        reservation.setCreateDate(now);
+        reservation.setDeadlineToConfirmAccordingToCreationTime(now);
+        Reservation r = reservationRepository.save(reservation);
 
-        reservationRepository.save(reservation);
-
-        List<Date> dates = new ArrayList<>();
-        dates.add(date);
-        reservation.setDates(dates);
-
-        return saveTemporary(reservation);
-    }
-
-    @Override
-    public ReservationResponse saveTemporaryCyclic(User user, VMPool vmPool, String courseName, Integer machinesCount, Date from, Date to, Integer interval) {
-        Reservation reservation = new CyclicReservation();
-        reservation.setOwner(user);
-        reservation.setPool(vmPool);
-        reservation.setCourseName(courseName);
-        reservation.setMachinesNumber(machinesCount);
-
-        Date createDate = new Date();
-        reservation.setCreateDate(createDate);
-        reservation.setDeadlineToConfirmAccordingToCreationTime(createDate);
-
-        reservationRepository.save(reservation);
-
-        ((CyclicReservation) reservation).setDates(from, to, Period.of(0, 0, interval));
-
-        return saveTemporary(reservation);
-    }
-
-    private ReservationResponse saveTemporary(Reservation reservation) {
-
-        ReservationResponse response = new ReservationResponse();
-
-        List<Reservation> collidingReservations = new ArrayList<>();
-        List<Date> reservedDates = new ArrayList<>();
-
-        for (Date date : reservation.getDates()) {
-            List<Reservation> collidingInDate = reservationRepository.findAllValidByPoolAndDate(
-                    reservation.getCreateDate(),
-                    reservation.getPool(),
-                    date
-            );
-            Integer sumOfMachinesReserved = 0;
-            for (Reservation r : collidingInDate) {
-                sumOfMachinesReserved += r.getMachinesNumber();
-            }
-            if ((sumOfMachinesReserved + reservation.getMachinesNumber())
-                    <= reservation.getPool().getMaximumCount()) {
-                reservationRepository.saveDateInReservation(reservation.getId(), date);
-                reservedDates.add(date);
-            } else {
-                collidingReservations.addAll(collidingInDate);
+        for(Date day : days){
+            Date from = new Date(day.getTime() + startTime.getTime());
+            Date to = new Date(day.getTime() + endTime.getTime());
+            try {
+                ReservationPeriod reservationPeriod = new ReservationPeriod(from, to, r);
+                //save reservationPeriod before?
+                r.addPeriod(reservationPeriod);
+            }catch(Exception e){
+                System.out.println("Collision");
             }
         }
-
-        reservation.setDates(reservedDates);
-        response.setCollisionsWithDesired(collidingReservations);
-        response.setReservationMade(reservation);
-        return response;
+        return r.getId();
     }
 
     @Override

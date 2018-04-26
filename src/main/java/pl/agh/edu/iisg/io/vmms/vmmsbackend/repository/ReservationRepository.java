@@ -18,8 +18,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query(value = "select r from Reservation as r " +
             "where ( r.confirmationDate is not null or r.deadlineToConfirm > :nowDate ) " +
-            "and :fromDate < any (select d from r.dates as d)" +
-            "and :toDate > any (select d from r.dates as d) ")
+            "and :fromDate < any (select p.endDate from r.periods as p )" +
+            "and :toDate > any (select p.startDate from r.periods as p )")
     List<Reservation> getAllValidByDatesBetween(
             @Param("nowDate") Date now,
             @Param("fromDate") Date from,
@@ -43,13 +43,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllValidByPoolAndDate(
             @Param("nowDate") Date nowDate,
             @Param("vmPool") VMPool pool,
-            @Param("date") Date date);
-
-    @Query(nativeQuery = true, value = "insert into reservations_details (reservation_id, date) " +
-            "values (:id, :date) " +
-            "returning (select r.id from reservation as r where r.id = :id)")
-    Long saveDateInReservation(
-            @Param("id") Long reservationId,
             @Param("date") Date date);
 
     @Query(value = "select r from Reservation as r " +

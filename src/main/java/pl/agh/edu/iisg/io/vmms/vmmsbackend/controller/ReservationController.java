@@ -13,12 +13,12 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.HttpException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationResponse;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.SingleReservation;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.ReservationService;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.UserService;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.VMPoolService;
 
+import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -95,13 +95,13 @@ public class ReservationController {
     @RequestMapping(path = RESERVATION_ENDPOINT, method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public Long createReservation(
-            @RequestParam("reservation")ReservationRequestDto reservation) {
-        User user = userService.find(reservation.getUserId());
-        VMPool vmPool = vmPoolService.find(reservation.getVmPoolId());
-        ReservationResponse reservationResponse = reservationService
-                .saveTemporarySingle(user, vmPool, reservation.getCourseName(),
-                        reservation.getMachinesNumber(), reservation.getDates().get(0).getStartDate());
-        return reservationResponse.getReservationMade().getId();
+            @RequestParam("reservationRequest")ReservationRequestDto reservationRequest) {
+        Reservation reservation = convertToReservation(reservationRequest);
+        return reservationService.saveTemporary(
+                reservation,
+                reservationRequest.getStartTime(),
+                reservationRequest.getEndTime(),
+                reservationRequest.getDates());
     }
 
     @RequestMapping(path = CONFIRM_TMP_ENDPOINT, method = RequestMethod.PUT)
@@ -142,50 +142,72 @@ public class ReservationController {
     }
 
     @RequestMapping(path = DELETE_DATES_FROM_RESERVATION_ENDPOINT, method = RequestMethod.DELETE)
-    public String deleteDatesFromReservation ( // TODO: Find out if it works.
+    public String deleteDatesFromReservation (
             @RequestParam("reservationId") Long reservationId,
-            @RequestParam("cancelledDates") List<ReservationPeriodDto> cancelledDates) throws ReservationNotFoundException, ReservationDateNotFoundException
+            @RequestParam("cancelledDates") @DateTimeFormat(pattern="yyyy-MM-dd") List<Date> cancelledDates)
+            throws ReservationNotFoundException, ReservationDateNotFoundException
     {
         Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
+
         if(reservation.isPresent()) {
             Reservation extractedReservation = reservation.get();
-            if(extractedReservation instanceof SingleReservation){
-                if(extractedReservation.getDates().equals(cancelledDates)) return deleteReservation(extractedReservation.getId());
-                else throw new ReservationDateNotFoundException();
-            } else {
-                List<Date> processedDates = extractedReservation.getDates();
-                for (ReservationPeriodDto date: cancelledDates){
-                    if (!processedDates.contains(date)) throw new ReservationDateNotFoundException();
-                }
-                for (ReservationPeriodDto date: cancelledDates){
-                    processedDates.remove(date);
-                }
-                extractedReservation.setDates(processedDates);
-                return "Done.";
+            Set<ReservationPeriod> processedPeriods = extractedReservation.getPeriods();
+            List<Date> reservationDates = processedPeriods
+                    .stream()
+                    .map(this:: convertPeriodToDay)
+                    .collect(Collectors.toList());
+
+            for (Date date: cancelledDates){
+                if (!reservationDates.contains(date)) throw new ReservationDateNotFoundException();
+            }
+            for(ReservationPeriod period : processedPeriods){
+                Date periodDay = convertPeriodToDay(period);
+                if(cancelledDates.contains(periodDay))
+                    processedPeriods.remove(period);
             }
         }
         else{
             throw new ReservationNotFoundException();
         }
+        return "Done";
     }
 
     private ReservationDto convertToDto(Reservation reservation) {
         ReservationDto dto = modelMapper.map(reservation, ReservationDto.class);
-        dto.setDates(reservation.getDates());
+
+        //mock
+        Set<ReservationPeriod> periods = reservation.getPeriods();
+        List<Date> dates = periods
+                .stream()
+                .map(p -> p.getStartDate())
+                .collect(Collectors.toList());
+        dto.setDates(dates);
+
         dto.setOwner(modelMapper.map(reservation.getOwner(), UserDto.class));
         return dto;
     }
 
-    private ReservationResponseDto convertToDto(ReservationResponse reservationResponse) {
-        ReservationResponseDto dto = new ReservationResponseDto();
-        dto.setReservationMade(convertToDto(reservationResponse.getReservationMade()));
-        List<ReservationDto> collisions =
-                reservationResponse.getCollisionsWithDesired()
-                        .stream()
-                        .map(this::convertToDto)
-                        .collect(Collectors.toList());
+    private Reservation convertToReservation(ReservationRequestDto request) {
 
-        dto.setCollisionsWithDesired(collisions);
-        return dto;
+        User user = userService.find(request.getUserId());
+        VMPool vmPool = vmPoolService.find(request.getVmPoolId());
+
+        Reservation reservation = new Reservation();
+        reservation.setCourseName(request.getCourseName());
+        reservation.setPool(vmPool);
+        reservation.setMachinesNumber(request.getMachinesNumber());
+        reservation.setOwner(user);
+        return reservation;
+    }
+
+    private Date convertPeriodToDay(ReservationPeriod period){
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(period.getStartDate());
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
     }
 }
