@@ -9,10 +9,11 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Constraint(validatedBy = ReservationPeriodValidator.class)
-@Target({ METHOD, CONSTRUCTOR })
+@Target({ METHOD, CONSTRUCTOR, PARAMETER })
 @Retention(RUNTIME)
 @Documented
 public @interface ValidReservationPeriod {

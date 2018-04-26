@@ -3,9 +3,11 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNullApi;
 import org.springframework.stereotype.Repository;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.validator.ValidReservationPeriod;
 
 import java.time.Period;
 import java.util.Date;
@@ -26,4 +28,8 @@ public interface ReservationPeriodRepository extends JpaRepository<ReservationPe
             @Param("nowDate") Date now,
             @Param("fromDate") Date from,
             @Param("toDate") Date to);
+
+
+    @Override
+    ReservationPeriod save(@ValidReservationPeriod ReservationPeriod reservationPeriod);
 }

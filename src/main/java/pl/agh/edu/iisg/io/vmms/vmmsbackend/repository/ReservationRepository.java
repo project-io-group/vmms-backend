@@ -28,8 +28,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query(value = "select r from Reservation as r " +
             "where r.pool.shortName = :vmPoolShortName " +
             "and (r.confirmationDate is not null or r.deadlineToConfirm > :nowDate) " +
-            "and :fromDate < any ( select d from r.dates as d) " +
-            "and :toDate > any ( select d from r.dates as d) ")
+            "and :fromDate < any ( select p.endDate from r.periods as p) " +
+            "and :toDate > any ( select p.startDate from r.periods as p) ")
     List<Reservation> getAllValidByDatesBetweenForVMPool(
             @Param("nowDate") Date now,
             @Param("fromDate") Date from,
@@ -37,18 +37,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("vmPoolShortName") String vmPoolShortName);
 
     @Query(value = "select r from Reservation as r " +
-            "where r.pool = :vmPool " +
-            "and (r.confirmationDate is not null or r.deadlineToConfirm > :nowDate) " +
-            "and :date = any ( select d from r.dates as d ) ")
-    List<Reservation> findAllValidByPoolAndDate(
-            @Param("nowDate") Date nowDate,
-            @Param("vmPool") VMPool pool,
-            @Param("date") Date date);
-
-    @Query(value = "select r from Reservation as r " +
             "where r.id = :id " +
             "and (r.confirmationDate is not null or r.deadlineToConfirm > :now)")
     Optional<Reservation> getIfConfirmedOrBeforeDeadline(@Param("id") Long id, @Param("now") Date now);
 
-    Reservation getTopByDatesContainingAndPoolAndConfirmationDateNotNullOrDeadlineToConfirmBeforeOrderByMachinesNumberDesc(List<Date> dates, VMPool pool, Date now);
 }

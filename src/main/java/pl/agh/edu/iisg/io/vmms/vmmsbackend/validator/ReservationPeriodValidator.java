@@ -23,7 +23,7 @@ public class ReservationPeriodValidator
             ReservationPeriod reservationPeriod, ConstraintValidatorContext context) {
 
         if (reservationPeriod == null) {
-            return true;
+            return false;
         }
 
         if (!(reservationPeriod instanceof ReservationPeriod)) {

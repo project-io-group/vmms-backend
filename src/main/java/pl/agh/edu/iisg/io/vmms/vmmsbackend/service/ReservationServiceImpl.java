@@ -9,6 +9,7 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.ReservationPeriodRepository;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.ReservationRepository;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.validator.ValidReservationPeriod;
 
 import java.util.Date;
 import java.util.List;
@@ -18,10 +19,13 @@ import java.util.Optional;
 public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final ReservationPeriodRepository reservationPeriodRepository;
 
     @Autowired
-    ReservationServiceImpl(ReservationRepository reservationRepository) {
+    ReservationServiceImpl(ReservationRepository reservationRepository,
+                           ReservationPeriodRepository reservationPeriodRepository) {
         this.reservationRepository = reservationRepository;
+        this.reservationPeriodRepository = reservationPeriodRepository;
     }
 
     @Override
@@ -63,7 +67,7 @@ public class ReservationServiceImpl implements ReservationService {
             Date to = new Date(day.getTime() + endTime.getTime());
             try {
                 ReservationPeriod reservationPeriod = new ReservationPeriod(from, to, r);
-                //save reservationPeriod before?
+                reservationPeriod = reservationPeriodRepository.save(reservationPeriod);
                 r.addPeriod(reservationPeriod);
             }catch(Exception e){
                 System.out.println("Collision");

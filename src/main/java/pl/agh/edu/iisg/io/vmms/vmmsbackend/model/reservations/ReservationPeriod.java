@@ -4,10 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.validator.ValidReservationPeriod;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -16,12 +13,15 @@ import java.util.Date;
 @Entity
 public class ReservationPeriod {
 
-    @ValidReservationPeriod
     public ReservationPeriod(Date startDate, Date endDate, Reservation reservation){
         this.startDate = startDate;
         this.endDate = endDate;
         this.reservation = reservation;
     }
+
+    @Id
+    @GeneratedValue
+    private Long id;
 
     @Column(columnDefinition = "TIMESTAMP")
     private Date startDate;
@@ -30,7 +30,7 @@ public class ReservationPeriod {
     private Date endDate;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn
     private Reservation reservation;
 
 }
