@@ -82,14 +82,19 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public Reservation confirm(Reservation reservation) {
+    public void confirm(Reservation reservation) {
 
         reservation.setConfirmationDate(new Date());
-        return reservationRepository.save(reservation);
+        reservationRepository.save(reservation);
     }
 
     @Override
     public void delete(Reservation reservation) {
         reservationRepository.delete(reservation);
+    }
+
+    @Override
+    public void deletePeriod(ReservationPeriod period){
+        reservationPeriodRepository.delete(period);
     }
 }

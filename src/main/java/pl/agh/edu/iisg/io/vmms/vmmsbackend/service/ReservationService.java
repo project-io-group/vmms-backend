@@ -4,6 +4,7 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.ReservationRequestDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
 
 import java.util.Date;
 import java.util.List;
@@ -26,7 +27,9 @@ public interface ReservationService {
 
     Optional<Reservation> findIfNotExpired(Long id);
 
-    Reservation confirm(Reservation reservation);
+    void confirm(Reservation reservation);
 
     void delete(Reservation reservation);
+
+    void deletePeriod(ReservationPeriod period);
 }

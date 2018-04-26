@@ -163,7 +163,8 @@ public class ReservationController {
             for(ReservationPeriod period : processedPeriods){
                 Date periodDay = convertPeriodToDay(period);
                 if(cancelledDates.contains(periodDay))
-                    processedPeriods.remove(period);
+                    extractedReservation.removePeriod(period);
+                    reservationService.deletePeriod(period);
             }
         }
         else{
@@ -179,7 +180,7 @@ public class ReservationController {
         Set<ReservationPeriod> periods = reservation.getPeriods();
         List<Date> dates = periods
                 .stream()
-                .map(p -> p.getStartDate())
+                .map(ReservationPeriod::getStartDate)
                 .collect(Collectors.toList());
         dto.setDates(dates);
 

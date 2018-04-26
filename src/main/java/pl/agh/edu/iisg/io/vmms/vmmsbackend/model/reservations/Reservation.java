@@ -38,7 +38,7 @@ public class Reservation {
     @JoinColumn(name = "poolId")
     private VMPool pool;
 
-    @OneToMany(mappedBy = "reservation")
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.REMOVE)
     private Set<ReservationPeriod> periods;
 
     @NotNull
