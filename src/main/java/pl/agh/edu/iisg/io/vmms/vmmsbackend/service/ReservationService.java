@@ -1,8 +1,6 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.ReservationRequestDto;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
+import org.springframework.validation.annotation.Validated;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
 
@@ -20,7 +18,7 @@ public interface ReservationService {
 
     List<Reservation> getConfirmedOrBeforeDeadlineToConfirmReservationsBetweenDatesForVMPool(String vmPoolShortName, Date from, Date to);
 
-    Long saveTemporary(Reservation reservation,
+    Reservation saveTemporary(Reservation reservation,
                        Date startTime,
                        Date endTime,
                        List<Date> days);

@@ -2,20 +2,17 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.ReservationRequestDto;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
+import org.springframework.validation.annotation.Validated;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.ReservationPeriodRepository;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.ReservationRepository;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.validator.ValidReservationPeriod;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import javax.validation.Valid;
+import java.util.*;
 
 @Service
+@Validated
 public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -52,7 +49,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public Long saveTemporary(Reservation reservation,
+    public Reservation saveTemporary(Reservation reservation,
                               Date startTime,
                               Date endTime,
                               List<Date> days) {
@@ -61,19 +58,19 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setCreateDate(now);
         reservation.setDeadlineToConfirmAccordingToCreationTime(now);
         Reservation r = reservationRepository.save(reservation);
-
+        r.setPeriods(new ArrayList<ReservationPeriod>());
         for(Date day : days){
             Date from = new Date(day.getTime() + startTime.getTime());
             Date to = new Date(day.getTime() + endTime.getTime());
             try {
-                ReservationPeriod reservationPeriod = new ReservationPeriod(from, to, r);
-                reservationPeriod = reservationPeriodRepository.save(reservationPeriod);
-                r.addPeriod(reservationPeriod);
+                @Valid ReservationPeriod reservationPeriod = new ReservationPeriod(from, to, r);
+                r.addPeriod(reservationPeriodRepository.save( reservationPeriod));
             }catch(Exception e){
                 System.out.println("Collision");
+                e.printStackTrace();
             }
         }
-        return r.getId();
+        return reservationRepository.findById(reservation.getId()).get();
     }
 
     @Override

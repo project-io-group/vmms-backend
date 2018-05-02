@@ -1,7 +1,9 @@
-package pl.agh.edu.iisg.io.vmms.vmmsbackend.dto;
+package pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.reservation;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.UserDto;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.VMPoolDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
 
 import java.text.SimpleDateFormat;

@@ -1,11 +1,15 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.*;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.reservation.ReservationDto;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.reservation.ReservationRequestDto;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.reservation.ReservationResponseDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.ReservationDateNotFoundException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.ReservationExpiredException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.ReservationNotFoundException;
@@ -18,7 +22,6 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.ReservationService;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.UserService;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.VMPoolService;
 
-import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -92,16 +95,48 @@ public class ReservationController {
         }
     }
 
+    @RequestMapping(path = "/create/{name}/{vm}/{number}/{from}/{to}/{day1}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ReservationResponseDto create(
+            @PathVariable String name,
+            @PathVariable Long vm,
+            @PathVariable Integer number,
+            @PathVariable @DateTimeFormat(pattern="HH:mm") Date from,
+            @PathVariable @DateTimeFormat(pattern="HH:mm") Date to,
+            @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date day1) {
+        ReservationRequestDto r = new ReservationRequestDto();
+        r.setCourseName(name);
+        r.setVmPoolId(vm);
+        r.setMachinesNumber(number);
+        r.setStartTime(from);
+        r.setEndTime(to);
+        List<Date> dates = new ArrayList<Date>();
+        dates.add(day1);
+        r.setDates(dates);
+        r.setUserId(new Long(1));
+        return createReservation(r);
+    }
+
     @RequestMapping(path = RESERVATION_ENDPOINT, method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public Long createReservation(
+    public ReservationResponseDto createReservation(
             @RequestParam("reservationRequest")ReservationRequestDto reservationRequest) {
         Reservation reservation = convertToReservation(reservationRequest);
-        return reservationService.saveTemporary(
+        reservation = reservationService.saveTemporary(
                 reservation,
                 reservationRequest.getStartTime(),
                 reservationRequest.getEndTime(),
                 reservationRequest.getDates());
+
+        List<Date> daysReserved = reservation
+                .getPeriods()
+                .stream()
+                .map(this::convertPeriodToDay)
+                .collect(Collectors.toList());
+
+        List<Date> daysRequested = reservationRequest.getDates();
+        daysRequested.removeAll(daysReserved);
+        return new ReservationResponseDto(reservation.getId(), daysRequested);
     }
 
     @RequestMapping(path = CONFIRM_TMP_ENDPOINT, method = RequestMethod.PUT)
@@ -151,7 +186,7 @@ public class ReservationController {
 
         if(reservation.isPresent()) {
             Reservation extractedReservation = reservation.get();
-            Set<ReservationPeriod> processedPeriods = extractedReservation.getPeriods();
+            List<ReservationPeriod> processedPeriods = extractedReservation.getPeriods();
             List<Date> reservationDates = processedPeriods
                     .stream()
                     .map(this:: convertPeriodToDay)
@@ -177,7 +212,7 @@ public class ReservationController {
         ReservationDto dto = modelMapper.map(reservation, ReservationDto.class);
 
         //mock
-        Set<ReservationPeriod> periods = reservation.getPeriods();
+        List<ReservationPeriod> periods = reservation.getPeriods();
         List<Date> dates = periods
                 .stream()
                 .map(ReservationPeriod::getStartDate)

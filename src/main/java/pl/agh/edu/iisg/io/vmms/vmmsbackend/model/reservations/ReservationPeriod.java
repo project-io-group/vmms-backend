@@ -1,5 +1,6 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.validator.ValidReservationPeriod;
@@ -11,6 +12,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @Entity
+@ValidReservationPeriod
 public class ReservationPeriod {
 
     public ReservationPeriod(Date startDate, Date endDate, Reservation reservation){
@@ -31,6 +33,7 @@ public class ReservationPeriod {
 
     @ManyToOne
     @JoinColumn
+    @JsonBackReference
     private Reservation reservation;
 
 }

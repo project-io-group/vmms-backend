@@ -1,4 +1,4 @@
-package pl.agh.edu.iisg.io.vmms.vmmsbackend.dto;
+package pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.reservation;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -23,6 +24,6 @@ public class ReservationRequestDto {
     Date endTime;
 
     @JsonFormat(pattern="yyyy-MM-dd")
-    ArrayList<Date> dates;
+    List<Date> dates;
 
 }

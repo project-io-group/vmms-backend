@@ -1,12 +1,17 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.validator.ValidReservationPeriod;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.Duration;
@@ -18,7 +23,6 @@ import java.util.Set;
 @Entity
 @NoArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-
 public class Reservation {
 
     @Transient
@@ -30,6 +34,7 @@ public class Reservation {
 
     @ManyToOne
     @JoinColumn(name = "userId")
+    @JsonBackReference
     private User owner;
 
     private String courseName;
@@ -38,8 +43,9 @@ public class Reservation {
     @JoinColumn(name = "poolId")
     private VMPool pool;
 
-    @OneToMany(mappedBy = "reservation", cascade = CascadeType.REMOVE)
-    private Set<ReservationPeriod> periods;
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private List<ReservationPeriod> periods;
 
     @NotNull
     @Min(0)

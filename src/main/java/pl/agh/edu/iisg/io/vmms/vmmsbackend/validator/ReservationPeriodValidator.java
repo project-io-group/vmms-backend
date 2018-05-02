@@ -1,6 +1,10 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.validator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.ReservationPeriodRepository;
@@ -11,12 +15,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
+@NoArgsConstructor
 public class ReservationPeriodValidator
         implements ConstraintValidator<ValidReservationPeriod, ReservationPeriod> {
 
-
     @Autowired
     private ReservationPeriodRepository reservationPeriodRepository;
+
+
+    public void initialize(ValidReservationPeriod annotation) {
+    }
 
     @Override
     public boolean isValid(
@@ -40,6 +49,12 @@ public class ReservationPeriodValidator
         if(reservationPeriod.getStartDate().before(now)
                 || reservationPeriod.getEndDate().before(now))
             return false;
+
+        try {
+            new ObjectMapper().writeValue(System.out, reservationPeriod);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         Reservation reservation = reservationPeriod.getReservation();
         List<ReservationPeriod> periodsColliding = reservationPeriodRepository
