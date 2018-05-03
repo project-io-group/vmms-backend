@@ -1,5 +1,6 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.reservation;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.UserDto;
@@ -16,9 +17,6 @@ import java.util.TimeZone;
 @NoArgsConstructor
 public class ReservationDto {
 
-    private static final SimpleDateFormat dateFormat
-            = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
     private Long id;
 
     private UserDto owner;
@@ -29,21 +27,13 @@ public class ReservationDto {
 
     private Integer machinesNumber;
 
-    private List<String> dates;
+    @JsonFormat(pattern="HH:mm")
+    Date startTime;
 
+    @JsonFormat(pattern="HH:mm")
+    Date endTime;
 
-    public List<Date> getDatesConverted() throws java.text.ParseException {
-        dateFormat.setTimeZone(TimeZone.getDefault());
-        List<Date> datesConverted = new ArrayList<>();
-        for(String date: dates)
-            datesConverted.add(dateFormat.parse(date));
-        return datesConverted;
-    }
+    @JsonFormat(pattern="yyyy-MM-dd")
+    List<Date> dates;
 
-    public void setDates(List<Date> dates) {
-        dateFormat.setTimeZone(TimeZone.getDefault());
-        this.dates = new ArrayList<String>();
-        for(Date date: dates)
-            this.dates.add(dateFormat.format(date));
-    }
 }

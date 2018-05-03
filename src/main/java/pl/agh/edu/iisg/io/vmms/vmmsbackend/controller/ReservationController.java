@@ -112,7 +112,7 @@ public class ReservationController {
         r.setMachinesNumber(number);
         r.setStartTime(from);
         r.setEndTime(to);
-        List<Date> dates = new ArrayList<Date>();
+        List<Date> dates = new ArrayList<>();
         dates.add(day1);
         dates.add(day2);
         r.setDates(dates);
@@ -214,13 +214,17 @@ public class ReservationController {
     private ReservationDto convertToDto(Reservation reservation) {
         ReservationDto dto = modelMapper.map(reservation, ReservationDto.class);
 
-        //mock
         List<ReservationPeriod> periods = reservation.getPeriods();
         List<Date> dates = periods
                 .stream()
-                .map(ReservationPeriod::getStartDate)
+                .map(this::convertPeriodToDay)
                 .collect(Collectors.toList());
         dto.setDates(dates);
+
+        if(!periods.isEmpty()) {
+            dto.setStartTime(periods.get(0).getStartDate());
+            dto.setEndTime(periods.get(0).getEndDate());
+        }
 
         dto.setOwner(modelMapper.map(reservation.getOwner(), UserDto.class));
         return dto;
