@@ -20,9 +20,13 @@ import java.util.stream.Collectors;
 public class ReservationPeriodValidator
         implements ConstraintValidator<ValidReservationPeriod, ReservationPeriod> {
 
-    @Autowired
+
     private ReservationPeriodRepository reservationPeriodRepository;
 
+    @Autowired
+    public ReservationPeriodValidator(ReservationPeriodRepository reservationPeriodRepository) {
+        this.reservationPeriodRepository = reservationPeriodRepository;
+    }
 
     public void initialize(ValidReservationPeriod annotation) {
     }

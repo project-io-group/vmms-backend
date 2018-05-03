@@ -12,7 +12,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @Entity
-@ValidReservationPeriod
+//@ValidReservationPeriod
 public class ReservationPeriod {
 
     public ReservationPeriod(Date startDate, Date endDate, Reservation reservation){
