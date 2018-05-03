@@ -12,6 +12,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @Entity
+//to be uncommented if autowiring in Validator is fixed
 //@ValidReservationPeriod
 public class ReservationPeriod {
 

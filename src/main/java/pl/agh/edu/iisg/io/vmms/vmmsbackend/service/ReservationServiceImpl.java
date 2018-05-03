@@ -1,5 +1,6 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -8,8 +9,10 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.ReservationPeriodRepository;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.ReservationRepository;
 
+import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Validated
@@ -58,19 +61,24 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.setCreateDate(now);
         reservation.setDeadlineToConfirmAccordingToCreationTime(now);
         Reservation r = reservationRepository.save(reservation);
-        r.setPeriods(new ArrayList<ReservationPeriod>());
+        r.setPeriods(new ArrayList<>());
         for(Date day : days){
+
             Date from = new Date(day.getTime() + startTime.getTime());
             Date to = new Date(day.getTime() + endTime.getTime());
             try {
-                @Valid ReservationPeriod reservationPeriod = new ReservationPeriod(from, to, r);
-                r.addPeriod(reservationPeriodRepository.save( reservationPeriod));
+                ReservationPeriod reservationPeriod = new ReservationPeriod(from, to, r);
+                //condition to be removed if autowiring in Validator is fixed
+                if(isValid(reservationPeriod)){
+                    r.addPeriod(reservationPeriodRepository.save( reservationPeriod));
+                }
+                //
             }catch(Exception e){
                 System.out.println("Collision");
                 e.printStackTrace();
             }
         }
-        return reservationRepository.findById(reservation.getId()).get();
+        return r;
     }
 
     @Override
@@ -93,5 +101,81 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public void deletePeriod(ReservationPeriod period){
         reservationPeriodRepository.delete(period);
+    }
+
+    //copied from Validator (to be removed when autowiring in Validator is fixed)
+    private boolean isValid(
+            ReservationPeriod reservationPeriod) {
+
+        if (reservationPeriod.getStartDate() == null
+                || reservationPeriod.getEndDate() == null
+                || reservationPeriod.getReservation() == null) {
+            return false;
+        }
+        Date now = new Date();
+        if(reservationPeriod.getStartDate().before(now)
+                || reservationPeriod.getEndDate().before(now))
+            return false;
+
+      /*  try {
+            new ObjectMapper().writeValue(System.out, reservationPeriod);
+        }catch (Exception e){
+            e.printStackTrace();
+        }*/
+
+        Reservation reservation = reservationPeriod.getReservation();
+        List<ReservationPeriod> periodsColliding = reservationPeriodRepository
+                .getAllPeriodsForVMPoolBetween(reservation.getPool(),
+                        now,
+                        reservationPeriod.getStartDate(),
+                        reservationPeriod.getEndDate());
+
+        Integer maxNumberReserved = getMaxMachinesCountInOneTime(periodsColliding);
+        return maxNumberReserved + reservation.getMachinesNumber()
+                <= reservation.getPool().getMaximumCount();
+    }
+
+
+    private Integer getMaxMachinesCountInOneTime(List<ReservationPeriod> periods){
+
+        if (periods.isEmpty()){
+            return 0;
+        }
+
+        List<ReservationPeriod> sortedByStartDate = periods
+                .stream()
+                .sorted((x, y) -> {
+                    if(x.getStartDate().before(y.getStartDate()))
+                        return -1;
+                    return 1;
+                } )
+                .collect(Collectors.toList());
+
+        List<ReservationPeriod> sortedByEndDate = periods
+                .stream()
+                .sorted((x, y) -> {
+                    if(x.getEndDate().before(y.getEndDate()))
+                        return -1;
+                    return 1;
+                } )
+                .collect(Collectors.toList());
+
+        Date currentDate;
+        int currentMachinesNumber = 0;
+        int max = 0;
+        int j = 0;
+        for(int i=0; i<periods.size(); i++){
+            currentDate = sortedByStartDate.get(i).getStartDate();
+            currentMachinesNumber += sortedByStartDate.get(i).getReservation().getMachinesNumber();
+
+            while(!sortedByEndDate.get(j).getEndDate().after(currentDate)){
+                currentMachinesNumber -= sortedByEndDate.get(j).getReservation().getMachinesNumber();
+                j++;
+            }
+            if(max < currentMachinesNumber){
+                max = currentMachinesNumber;
+            }
+        }
+        return max;
     }
 }

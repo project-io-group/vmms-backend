@@ -22,15 +22,12 @@ public interface ReservationPeriodRepository extends JpaRepository<ReservationPe
             "where r.reservation.pool = :pool " +
             "and (  r.reservation.confirmationDate is not null " +
             "       or r.reservation.deadlineToConfirm > :nowDate ) " +
-            "and :fromDate < any (select p.endDate from r.reservation.periods as p )" +
-            "and :toDate > any (select p.startDate from r.reservation.periods as p )")
+            "and :fromDate < r.endDate " +
+            "and :toDate > r.startDate")
     List<ReservationPeriod> getAllPeriodsForVMPoolBetween(
             @Param("pool") VMPool pool,
             @Param("nowDate") Date now,
             @Param("fromDate") Date from,
             @Param("toDate") Date to);
 
-
-    @Override
-    ReservationPeriod save( ReservationPeriod reservationPeriod);
 }

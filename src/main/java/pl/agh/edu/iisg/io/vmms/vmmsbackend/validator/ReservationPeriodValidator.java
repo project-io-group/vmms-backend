@@ -39,11 +39,6 @@ public class ReservationPeriodValidator
             return false;
         }
 
-        if (!(reservationPeriod instanceof ReservationPeriod)) {
-            throw new IllegalArgumentException("Illegal method signature, "
-                    + "expected parameter of type ReservationPeriod.");
-        }
-
         if (reservationPeriod.getStartDate() == null
                 || reservationPeriod.getEndDate() == null
                 || reservationPeriod.getReservation() == null) {
@@ -84,17 +79,17 @@ public class ReservationPeriodValidator
                 .stream()
                 .sorted((x, y) -> {
                     if(x.getStartDate().before(y.getStartDate()))
-                        return 1;
-                    return -1;
+                        return -1;
+                    return 1;
                 } )
                 .collect(Collectors.toList());
 
         List<ReservationPeriod> sortedByEndDate = periods
                 .stream()
                 .sorted((x, y) -> {
-                    if(x.getEndDate().before(y.getStartDate()))
-                        return 1;
-                    return -1;
+                    if(x.getEndDate().before(y.getEndDate()))
+                        return -1;
+                    return 1;
                 } )
                 .collect(Collectors.toList());
 
@@ -109,6 +104,9 @@ public class ReservationPeriodValidator
             while(!sortedByEndDate.get(j).getEndDate().after(currentDate)){
                 currentMachinesNumber -= sortedByEndDate.get(j).getReservation().getMachinesNumber();
                 j++;
+            }
+            if(max < currentMachinesNumber){
+                max = currentMachinesNumber;
             }
         }
         return max;
