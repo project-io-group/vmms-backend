@@ -95,31 +95,6 @@ public class ReservationController {
         }
     }
 
-    //MOCK to check if works
-    @RequestMapping(path = "/create/{name}/{vm}/{number}/{from}/{to}/{day1}/{day2}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ReservationResponseDto create(
-            @PathVariable String name,
-            @PathVariable Long vm,
-            @PathVariable Integer number,
-            @PathVariable @DateTimeFormat(pattern="HH:mm") Date from,
-            @PathVariable @DateTimeFormat(pattern="HH:mm") Date to,
-            @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date day1,
-            @PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date day2) {
-        ReservationRequestDto r = new ReservationRequestDto();
-        r.setCourseName(name);
-        r.setVmPoolId(vm);
-        r.setMachinesNumber(number);
-        r.setStartTime(from);
-        r.setEndTime(to);
-        List<Date> dates = new ArrayList<>();
-        dates.add(day1);
-        dates.add(day2);
-        r.setDates(dates);
-        r.setUserId(new Long(1));
-        return createReservation(r);
-    }
-
     @RequestMapping(path = RESERVATION_ENDPOINT, method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponseDto createReservation(

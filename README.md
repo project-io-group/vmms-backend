@@ -44,3 +44,12 @@ Parameters for connecting with external software can be read from `docker-compos
 
 ### You can import pcoips (pcoip_pools.csv) with:
 `curl -i -X POST -F "file=@pcoip_pools.csv" http://localhost:9045/vm/import`
+
+### You can check reservations at:
+`http://localhost:9045/reservations?userId=user_id` (list all reservations made by user with given id)  
+`http://localhost:9045/reservations?userId=user_id&from=from_date&to=to_date` (the same as above but reservations are between from_date and to_date)  
+`http://localhost:9045/vm/{vmShortName}/between?from=from_date&to=to_date`  (list all reservations for one vmpool between from_date and to_date)  
+`http://localhost:9045/reservation?reservationId=reservation_id`  (get reservation with given id)    
+
+(Date format is `yyyy-MM-dd HH:mm`)
+  
