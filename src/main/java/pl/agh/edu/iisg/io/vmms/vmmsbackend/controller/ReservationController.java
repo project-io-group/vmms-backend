@@ -1,12 +1,11 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.*;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.UserDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.reservation.ReservationDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.reservation.ReservationRequestDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.reservation.ReservationResponseDto;
@@ -22,7 +21,11 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.ReservationService;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.UserService;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.VMPoolService;
 
-import java.util.*;
+import javax.validation.Valid;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @CrossOrigin("*")
@@ -98,7 +101,7 @@ public class ReservationController {
     @RequestMapping(path = RESERVATION_ENDPOINT, method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponseDto createReservation(
-            @RequestParam("reservationRequest")ReservationRequestDto reservationRequest) {
+            @Valid ReservationRequestDto reservationRequest) {
         Reservation reservation = convertToReservation(reservationRequest);
         reservation = reservationService.saveTemporary(
                 reservation,

@@ -1,6 +1,5 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -9,9 +8,10 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.ReservationPeriodRepository;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.ReservationRepository;
 
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.Valid;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -125,7 +125,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         Reservation reservation = reservationPeriod.getReservation();
         List<ReservationPeriod> periodsColliding = reservationPeriodRepository
-                .getAllPeriodsForVMPoolBetween(reservation.getPool(),
+                .getAllPeriodsForVMPoolBetween(reservation.getPool().getId(),
                         now,
                         reservationPeriod.getStartDate(),
                         reservationPeriod.getEndDate());

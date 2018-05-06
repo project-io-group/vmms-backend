@@ -3,7 +3,6 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.validator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
@@ -57,7 +56,7 @@ public class ReservationPeriodValidator
 
         Reservation reservation = reservationPeriod.getReservation();
         List<ReservationPeriod> periodsColliding = reservationPeriodRepository
-                .getAllPeriodsForVMPoolBetween(reservation.getPool(),
+                .getAllPeriodsForVMPoolBetween(reservation.getPool().getId(),
                         now,
                         reservationPeriod.getStartDate(),
                         reservationPeriod.getEndDate());
