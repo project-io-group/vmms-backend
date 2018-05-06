@@ -1,7 +1,6 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
-
 import java.util.List;
 
 public interface VMPoolService {
@@ -11,7 +10,7 @@ public interface VMPoolService {
 
     List<VMPool> findByDescriptionContaining(String name);
 
-    VMPool find(String displayName);
+    VMPool find(String shortName);
 
     VMPool find(Long id);
 

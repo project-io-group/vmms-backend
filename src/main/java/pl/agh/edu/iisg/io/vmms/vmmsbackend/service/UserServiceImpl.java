@@ -44,9 +44,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User save(String name) {
+    public User save(String name, Boolean isAdmin) {
         User user = new User();
         user.setUserName(name);
+        user.setAdmin(isAdmin);
         return userRepository.save(user);
     }
 

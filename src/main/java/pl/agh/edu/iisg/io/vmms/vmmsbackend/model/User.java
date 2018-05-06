@@ -2,6 +2,7 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
@@ -17,7 +18,8 @@ import java.util.Set;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE)
+    @JsonManagedReference
     public Set<Reservation> reservations;
     @Id
     @GeneratedValue

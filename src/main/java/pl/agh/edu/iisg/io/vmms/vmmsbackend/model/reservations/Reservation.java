@@ -1,24 +1,32 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.validator.ValidReservationPeriod;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.time.Duration;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
 @NoArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "reservation_type")
-public abstract class Reservation {
+public class Reservation {
+
+    @Transient
+    public static final Duration EXPIRATION_TIME = Duration.ofMinutes(20);
 
     @Id
     @GeneratedValue
@@ -26,6 +34,7 @@ public abstract class Reservation {
 
     @ManyToOne
     @JoinColumn(name = "userId")
+    @JsonBackReference
     private User owner;
 
     private String courseName;
@@ -34,16 +43,32 @@ public abstract class Reservation {
     @JoinColumn(name = "poolId")
     private VMPool pool;
 
-    @Column(name = "date", columnDefinition = "TIMESTAMP")
-    @NotNull
-    @ElementCollection
-    @CollectionTable(
-            name = "reservations_details",
-            joinColumns = @JoinColumn(name = "reservationId")
-    )
-    private List<Date> dates;
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private List<ReservationPeriod> periods;
 
     @NotNull
     @Min(0)
     private Integer machinesNumber;
+
+    @Column(columnDefinition = "TIMESTAMP")
+    private Date createDate;
+
+    @Column(columnDefinition = "TIMESTAMP")
+    private Date deadlineToConfirm;
+
+    @Column(columnDefinition = "TIMESTAMP")
+    private Date confirmationDate;
+
+    public void setDeadlineToConfirmAccordingToCreationTime(Date date) {
+        deadlineToConfirm = Date.from(date.toInstant().plus(EXPIRATION_TIME));
+    }
+
+    public void addPeriod(ReservationPeriod period){
+        this.periods.add(period);
+    }
+
+    public void removePeriod(ReservationPeriod period){
+        this.periods.remove(period);
+    }
 }
