@@ -59,6 +59,7 @@ public class ReservationController {
             @RequestParam("userId") Long userId) {
         return reservationService.getConfirmedOrBeforeDeadlineToConfirmReservations()
                 .stream()
+                .filter(r -> r.getOwner().getId().equals(userId))
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -71,6 +72,7 @@ public class ReservationController {
         return reservationService
                 .getConfirmedOrBeforeDeadlineToConfirmReservationsBetweenDates(from, to)
                 .stream()
+                .filter(r -> r.getOwner().getId().equals(userId))
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -150,7 +152,7 @@ public class ReservationController {
         Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
         if(reservation.isPresent()) {
             reservationService.delete(reservation.get());
-            return "Done.";
+            return "DELETED";
         }
         else{
             throw new ReservationNotFoundException();
@@ -186,7 +188,7 @@ public class ReservationController {
         else{
             throw new ReservationNotFoundException();
         }
-        return "Done";
+        return "DELETED";
     }
 
     private ReservationDto convertToDto(Reservation reservation) {

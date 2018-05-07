@@ -28,7 +28,7 @@ option -d is for running in the background
 Parameters for connecting with external software can be read from `docker-compose.yml`
 
 ### Manually inserting to database after connection:
-`insert into users(id, user_name) values (1, 'ala');`
+`insert into users(id, is_admin, user_name) values (5, false, 'ala');`
 
 ### Manually checking endpoints:
 `curl -H "Content-Type: application/json" -X POST -d '{"name": "ala"}' http://localhost:9045/user/create`

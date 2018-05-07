@@ -7,7 +7,7 @@ public class ReservationDateNotFoundException extends HttpException {
     private final String errorDescription;
 
     public ReservationDateNotFoundException() {
-        super("Confirmation time exceeded!");
+        super("Reservation with this ID is not scheduled for given date.");
         this.httpStatus = 404;
         this.errorDescription = "Reservation with this ID is not scheduled for given date.";
     }

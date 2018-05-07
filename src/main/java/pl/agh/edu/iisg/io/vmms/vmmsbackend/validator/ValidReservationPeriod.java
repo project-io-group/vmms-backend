@@ -15,9 +15,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Documented
 public @interface ValidReservationPeriod {
-    String message() default "End date must be after begin date "
+    String message() default "An End date must be after a begin date "
             + "and both must be in the future," +
-            " must be enough machines in the pool during whole period";
+            " there have to be enough machines in the pool during the whole reservation duration.";
 
     Class<?>[] groups() default {};
 
