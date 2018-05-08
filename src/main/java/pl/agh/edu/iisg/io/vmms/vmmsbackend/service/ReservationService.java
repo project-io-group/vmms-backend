@@ -1,6 +1,5 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 
-import org.springframework.validation.annotation.Validated;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
 

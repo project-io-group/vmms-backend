@@ -69,7 +69,7 @@ public class ReservationServiceImpl implements ReservationService {
             try {
                 ReservationPeriod reservationPeriod = new ReservationPeriod(from, to, r);
                 //condition to be removed if autowiring in Validator is fixed
-                if(isValid(reservationPeriod)){
+                if(isReservationPeriodValid(reservationPeriod)){
                     r.addPeriod(reservationPeriodRepository.save( reservationPeriod));
                 }
                 //
@@ -103,8 +103,7 @@ public class ReservationServiceImpl implements ReservationService {
         reservationPeriodRepository.delete(period);
     }
 
-    //copied from Validator (to be removed when autowiring in Validator is fixed)
-    private boolean isValid(
+    private boolean isReservationPeriodValid(
             ReservationPeriod reservationPeriod) {
 
         if (reservationPeriod.getStartDate() == null

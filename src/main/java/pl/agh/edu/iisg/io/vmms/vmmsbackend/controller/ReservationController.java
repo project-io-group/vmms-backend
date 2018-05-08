@@ -22,10 +22,7 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.UserService;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.VMPoolService;
 
 import javax.validation.Valid;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @CrossOrigin("*")
@@ -103,7 +100,7 @@ public class ReservationController {
     @RequestMapping(path = RESERVATION_ENDPOINT, method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponseDto createReservation(
-            @Valid ReservationRequestDto reservationRequest) {
+            @Valid @RequestBody ReservationRequestDto reservationRequest) {
         Reservation reservation = convertToReservation(reservationRequest);
         reservation = reservationService.saveTemporary(
                 reservation,

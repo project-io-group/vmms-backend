@@ -5,19 +5,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.validation.annotation.Validated;
+
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.validator.ValidReservationPeriod;
 
 import javax.persistence.*;
-import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Entity
