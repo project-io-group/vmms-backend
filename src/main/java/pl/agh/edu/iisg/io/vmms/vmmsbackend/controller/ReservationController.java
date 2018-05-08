@@ -121,7 +121,7 @@ public class ReservationController {
 
     @RequestMapping(path = CONFIRM_TMP_ENDPOINT, method = RequestMethod.PUT)
     public String confirmReservation(
-            @RequestParam("reservationId") Long reservationId) throws ReservationExpiredException {
+            @RequestBody Long reservationId) throws ReservationExpiredException {
         Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
         if (reservation.isPresent()) {
             reservationService.confirm(reservation.get());
@@ -133,7 +133,7 @@ public class ReservationController {
 
     @RequestMapping(path = CANCEL_TMP_ENDPOINT, method = RequestMethod.DELETE)
     public String cancelReservation(
-            @RequestParam("reservationId") Long reservationId) throws ReservationExpiredException {
+            @RequestBody Long reservationId) throws ReservationExpiredException {
         Optional<Reservation> reservation = reservationService.find(reservationId);
         if (reservation.isPresent()) {
             reservationService.delete(reservation.get());
@@ -145,7 +145,7 @@ public class ReservationController {
 
     @RequestMapping(path = RESERVATION_ENDPOINT, method = RequestMethod.DELETE)
     public String deleteReservation(
-            @RequestParam("reservationId") Long reservationId) throws ReservationNotFoundException {
+            @RequestBody Long reservationId) throws ReservationNotFoundException {
         Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
         if(reservation.isPresent()) {
             reservationService.delete(reservation.get());
@@ -158,8 +158,8 @@ public class ReservationController {
 
     @RequestMapping(path = DELETE_DATES_FROM_RESERVATION_ENDPOINT, method = RequestMethod.DELETE)
     public String deleteDatesFromReservation (
-            @RequestParam("reservationId") Long reservationId,
-            @RequestParam("cancelledDates") @DateTimeFormat(pattern="yyyy-MM-dd") List<Date> cancelledDates)
+            @RequestBody Long reservationId,
+            @RequestBody @DateTimeFormat(pattern="yyyy-MM-dd") List<Date> cancelledDates)
             throws ReservationNotFoundException, ReservationDateNotFoundException
     {
         Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
