@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.user.UserLoginRequestDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.ApplicationUser;
 
 import javax.servlet.FilterChain;
@@ -33,8 +34,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public Authentication attemptAuthentication(HttpServletRequest req,
                                                 HttpServletResponse res) throws AuthenticationException {
         try {
-            ApplicationUser creds = new ObjectMapper()
-                    .readValue(req.getInputStream(), ApplicationUser.class);
+            UserLoginRequestDto credsDto = new ObjectMapper()
+                    .readValue(req.getInputStream(), UserLoginRequestDto.class);
+
+            ApplicationUser creds = convertDto(credsDto);
 
             return authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -44,6 +47,14 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private ApplicationUser convertDto(UserLoginRequestDto credsDto) {
+        ApplicationUser creds = new ApplicationUser();
+        creds.setUserName(credsDto.getEmail());
+        creds.setPassword(credsDto.getPassword());
+        creds.setEmail(credsDto.getEmail());
+        return creds;
     }
 
     @Override
@@ -58,6 +69,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .signWith(SignatureAlgorithm.HS512, SECRET.getBytes())
                 .compact();
         res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
+
+        res.getWriter().write(String.format("\"token\" : \"%s\"", token));
+        res.getWriter().flush();
+        res.getWriter().close();
     }
 
 }

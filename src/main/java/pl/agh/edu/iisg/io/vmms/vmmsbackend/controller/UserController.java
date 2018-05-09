@@ -50,8 +50,10 @@ public class UserController {
 
     @PostMapping(SecurityConstants.SIGN_UP_URL)
     public void signUp(@RequestBody UserSignUpRequestDto registerRequest) {
+        // we are using email as the username fullName parameter should not be used as username
+        // because it is optional. Currently fullname is not stored at all
         ApplicationUser applicationUser = new ApplicationUser();
-        applicationUser.setUserName(registerRequest.getFullName());
+        applicationUser.setUserName(registerRequest.getEmail());
         applicationUser.setEmail(registerRequest.getEmail());
         applicationUser.setPassword(bCryptPasswordEncoder.encode(registerRequest.getPassword()));
 
