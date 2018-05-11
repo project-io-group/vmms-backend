@@ -106,13 +106,10 @@ public class UserControllerIntegrationTest {
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON);
 
-        Map<String, Object> requestParams = new HashMap<>();
-        requestParams.put(USER_NAME, userName);
-        requestParams.put(USER_ADMIN, isAdmin);
-
         //when
         Response response = request.when()
-                .body(requestParams)
+                .body(userName)
+                .body(isAdmin)
                 .post(CREATE_USER_ENDPOINT);
 
         //then
@@ -144,12 +141,9 @@ public class UserControllerIntegrationTest {
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON);
 
-        Map<String, Object> requestParams = new HashMap<>();
-        requestParams.put(USER_ID, userId);
-
         //when
         Response response = request.when()
-                .body(requestParams)
+                .body(userId)
                 .post(DELETE_USER_ENDPOINT);
 
         //then
