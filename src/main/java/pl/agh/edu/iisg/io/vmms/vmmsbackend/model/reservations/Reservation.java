@@ -68,4 +68,8 @@ public class Reservation {
     public void removePeriod(ReservationPeriod period){
         this.periods.remove(period);
     }
+
+    public boolean isExpired(){
+        return confirmationDate == null && deadlineToConfirm.before(new Date());
+    }
 }

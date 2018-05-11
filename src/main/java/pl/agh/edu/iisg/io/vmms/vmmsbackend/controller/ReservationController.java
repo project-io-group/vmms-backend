@@ -93,7 +93,7 @@ public class ReservationController {
         if (reservation.isPresent()) {
             return convertToDto(reservation.get());
         } else {
-            throw new ReservationExpiredException();
+            throw new ReservationNotFoundException();
         }
     }
 
@@ -120,36 +120,42 @@ public class ReservationController {
     }
 
     @RequestMapping(path = CONFIRM_TMP_ENDPOINT, method = RequestMethod.PUT)
-    public String confirmReservation(
-            @RequestBody Long reservationId) throws ReservationExpiredException {
-        Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
+    @ResponseStatus(HttpStatus.OK)
+    public void confirmReservation(
+            @RequestBody Long reservationId) throws ReservationExpiredException, ReservationNotFoundException {
+        Optional<Reservation> reservation = reservationService.find(reservationId);
         if (reservation.isPresent()) {
+            if(reservation.get().isExpired()) {
+                throw new ReservationExpiredException();
+            }
             reservationService.confirm(reservation.get());
-            return "CONFIRMED";
         } else {
-            throw new ReservationExpiredException();
+            throw new ReservationNotFoundException();
         }
     }
 
     @RequestMapping(path = CANCEL_TMP_ENDPOINT, method = RequestMethod.DELETE)
-    public String cancelReservation(
-            @RequestBody Long reservationId) throws ReservationExpiredException {
+    @ResponseStatus(HttpStatus.OK)
+    public void cancelReservation(
+            @RequestParam Long reservationId) throws ReservationExpiredException, ReservationNotFoundException {
         Optional<Reservation> reservation = reservationService.find(reservationId);
         if (reservation.isPresent()) {
+            if(reservation.get().isExpired()){
+                throw new ReservationExpiredException();
+            }
             reservationService.delete(reservation.get());
-            return "CANCELED";
         } else {
-            throw new ReservationExpiredException();
+            throw new ReservationNotFoundException();
         }
     }
 
     @RequestMapping(path = RESERVATION_ENDPOINT, method = RequestMethod.DELETE)
-    public String deleteReservation(
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteReservation(
             @RequestBody Long reservationId) throws ReservationNotFoundException {
         Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);
         if(reservation.isPresent()) {
             reservationService.delete(reservation.get());
-            return "DELETED";
         }
         else{
             throw new ReservationNotFoundException();
@@ -157,7 +163,8 @@ public class ReservationController {
     }
 
     @RequestMapping(path = DELETE_DATES_FROM_RESERVATION_ENDPOINT, method = RequestMethod.DELETE)
-    public String deleteDatesFromReservation (
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteDatesFromReservation (
             @RequestBody Long reservationId,
             @RequestBody @DateTimeFormat(pattern="yyyy-MM-dd") List<Date> cancelledDates)
             throws ReservationNotFoundException, ReservationDateNotFoundException
@@ -185,7 +192,6 @@ public class ReservationController {
         else{
             throw new ReservationNotFoundException();
         }
-        return "DELETED";
     }
 
     private ReservationDto convertToDto(Reservation reservation) {
