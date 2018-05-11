@@ -9,7 +9,7 @@ public class MissingUserIdException extends HttpException {
 
     public MissingUserIdException() {
         super("Please provide user id!");
-        this.httpStatus = 200;
+        this.httpStatus = 400;
     }
 
     @Override
