@@ -34,4 +34,17 @@ public class VMPool {
     private Boolean enabled;
     @Column(length = 2048)
     private String description;
+
+    @Override
+    public int hashCode(){
+        return id.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if(obj.getClass().equals(this.getClass())) {
+            return this.getId().equals(((VMPool) obj).getId());
+        }
+        return false;
+    }
 }
