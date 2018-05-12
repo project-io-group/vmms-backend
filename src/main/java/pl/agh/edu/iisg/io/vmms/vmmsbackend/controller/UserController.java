@@ -4,22 +4,28 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.HttpException;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.MissingUserNameException;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.UserNotFoundException;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.UserDto;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.*;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.UserService;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @CrossOrigin("*")
 @RestController
 public class UserController {
 
-    private static final String NAME = "name";
-    private static final String USER_ID = "userId";
+    static final String USER_NAME = "name";
+    static final String USER_ID = "id";
+    static final String USER_ADMIN = "admin";
+
+    static final String MAIN_ENDPOINT = "/";
+    static final String USERS_ENDPOINT = "/users";
+    static final String CREATE_USER_ENDPOINT = "/user/create";
+    static final String DELETE_USER_ENDPOINT = "/user/delete";
 
     private final UserService userService;
 
@@ -28,34 +34,40 @@ public class UserController {
         this.userService = userService;
     }
 
-    @RequestMapping("/")
+    @RequestMapping(MAIN_ENDPOINT)
     public String index() {
         return "Virtual Machine Management System";
     }
 
-    @RequestMapping(path = "/users", method = RequestMethod.GET)
-    public List<User> getUsers() {
-        return userService.getUsers();
+    @RequestMapping(path = USERS_ENDPOINT, method = RequestMethod.GET)
+    public List<UserDto> getUsers() {
+        return userService.getUsers().stream()
+                .map(user -> new UserDto(user.getId(), user.getUserName(), user.isAdmin()))
+                .collect(Collectors.toList());
     }
 
-    @RequestMapping(path = "/users/{name}", method = RequestMethod.GET)
-    public List<User> getUsers(@PathVariable String name) {
-        return userService.findByNameContaining(name);
+    @RequestMapping(path = USERS_ENDPOINT + "/{name}", method = RequestMethod.GET)
+    public List<UserDto> getUsers(@PathVariable String name) {
+        return userService.findByNameContaining(name).stream()
+                .map(user -> new UserDto(user.getId(), user.getUserName(), user.isAdmin()))
+                .collect(Collectors.toList());
     }
 
-    @RequestMapping(path = "/user/create", method = RequestMethod.POST)
+    @RequestMapping(path = CREATE_USER_ENDPOINT, method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public User createUser(@RequestBody Map<String, String> request) throws HttpException {
-        String userName = Optional.ofNullable(request.get(NAME)).orElseThrow(MissingUserNameException::new);
-        return userService.save(userName);
+    public UserDto createUser(@RequestBody String userName, @RequestBody Boolean isAdmin) throws HttpException {
+        User user = userService.save(userName, isAdmin);
+        return new UserDto(user.getId(), user.getUserName(), user.isAdmin());
     }
 
-    @RequestMapping(path = "/user/delete", method = RequestMethod.POST)
+    @RequestMapping(path = DELETE_USER_ENDPOINT, method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.OK)
-    public User deleteUser(@RequestBody Map<String, Long> request) throws HttpException {
-        Long userId = Optional.ofNullable(request.get(USER_ID)).orElseThrow(MissingUserNameException::new);
+    public UserDto deleteUser(@RequestBody Long userId) throws HttpException {
         User user = Optional.ofNullable(userService.find(userId)).orElseThrow(UserNotFoundException::new);
+        if (!user.getReservations().isEmpty()) {
+            throw new NotEmptyReservationsException();
+        }
         userService.delete(user);
-        return user;
+        return new UserDto(user.getId(), user.getUserName(), user.isAdmin());
     }
 }

@@ -1,5 +1,6 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.Set;
 public class VMPool {
 
     @OneToMany(mappedBy = "pool")
+    @JsonBackReference
     public Set<Reservation> reservations;
     @Id
     @GeneratedValue

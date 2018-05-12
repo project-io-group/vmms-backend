@@ -25,8 +25,10 @@ option -d is for running in the background
 ### Connecting to the database:
 `docker exec -it vmmsbackend_db_1 psql -h localhost -p 5432 -U vmms_app vmms`
 
+Parameters for connecting with external software can be read from `docker-compose.yml`
+
 ### Manually inserting to database after connection:
-`insert into users(id, user_name) values (1, 'ala');`
+`insert into users(id, is_admin, user_name) values (5, false, 'ala');`
 
 ### Manually checking endpoints:
 `curl -H "Content-Type: application/json" -X POST -d '{"name": "ala"}' http://localhost:9045/user/create`
@@ -41,4 +43,13 @@ option -d is for running in the background
 `http://localhost:9045/vm/tag/some_tag` (list all with some_tag in description)   
 
 ### You can import pcoips (pcoip_pools.csv) with:
-`curl -i -X POST -F "file=@path_to_file" http://localhost:9045/vm/import`
+`curl -i -X POST -F "file=@pcoip_pools.csv" http://localhost:9045/vm/import`
+
+### You can check reservations at:
+`http://localhost:9045/reservations?userId=user_id` (list all reservations made by user with given id)  
+`http://localhost:9045/reservations?userId=user_id&from=from_date&to=to_date` (the same as above but reservations are between from_date and to_date)  
+`http://localhost:9045/vm/{vmShortName}/between?from=from_date&to=to_date`  (list all reservations for one vmpool between from_date and to_date)  
+`http://localhost:9045/reservation?reservationId=reservation_id`  (get reservation with given id)    
+
+(Date format is `yyyy-MM-dd HH:mm`)
+  
