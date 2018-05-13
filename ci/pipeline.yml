@@ -6,6 +6,12 @@ resource_types:
     repository: cfcommunity/slack-notification-resource
     tag: latest
 
+- name: heroku-resource
+  type: docker-image
+  source:
+    repository: periscopedata/heroku-resource
+    tag: latest
+
 
 resources:
 - name: slack-alert
@@ -19,6 +25,12 @@ resources:
     uri: git@github.com:project-io-group/vmms-backend.git
     branch: ((branch))
     private_key: ((git-private-key))
+
+- name: heroku
+  type: heroku-resource
+  source:
+    heroku_api_key: ((heroku-api-key))
+    heroku_app_name: vmms-backend
 
 
 jobs:
@@ -37,3 +49,10 @@ jobs:
     trigger: true
   - task: build
     file: sourcecode/ci/tasks/build.yml
+#  - put: heroku
+#    timeout: 1m
+#    attempts: 1
+#    params:
+#      pipeline_id: {{pipeline-id}}
+#      source_app_id: {{source-app-id}}
+#      target_app_id: {{target-app-id}}
