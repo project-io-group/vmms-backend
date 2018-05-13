@@ -17,7 +17,7 @@ resources:
   type: git
   source:
     uri: git@github.com:project-io-group/vmms-backend.git
-    branch: master
+    branch: ((branch))
     private_key: ((git-private-key))
 
 
@@ -29,9 +29,9 @@ jobs:
       channel: '#builds'
       text: |
         The build failed. Check it out at:
-        http://my.concourse.url/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+        http://35.180.56.35:8080//teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
         or at:
-        http://my.concourse.url/builds/$BUILD_ID
+        http://35.180.56.35:8080//builds/$BUILD_ID
   plan:
   - get: sourcecode
     trigger: true
