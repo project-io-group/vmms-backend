@@ -55,17 +55,14 @@ public class UserController {
 
     @RequestMapping(path = CREATE_USER_ENDPOINT, method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@RequestBody Map<String, Object> request) throws HttpException {
-        String userName = String.valueOf(Optional.ofNullable(request.get(USER_NAME)).orElseThrow(MissingUserNameException::new));
-        Boolean isAdmin = (Boolean) Optional.ofNullable(request.get(USER_ADMIN)).orElse(false);
+    public UserDto createUser(@RequestBody String userName, @RequestBody Boolean isAdmin) throws HttpException {
         User user = userService.save(userName, isAdmin);
         return new UserDto(user.getId(), user.getUserName(), user.isAdmin());
     }
 
-    @RequestMapping(path = DELETE_USER_ENDPOINT, method = RequestMethod.POST)
+    @RequestMapping(path = DELETE_USER_ENDPOINT, method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.OK)
-    public UserDto deleteUser(@RequestBody Map<String, Object> request) throws HttpException {
-        Long userId = ((Integer) Optional.ofNullable(request.get(USER_ID)).orElseThrow(MissingUserIdException::new)).longValue();
+    public UserDto deleteUser(@RequestBody Long userId) throws HttpException {
         User user = Optional.ofNullable(userService.find(userId)).orElseThrow(UserNotFoundException::new);
         if (!user.getReservations().isEmpty()) {
             throw new NotEmptyReservationsException();
