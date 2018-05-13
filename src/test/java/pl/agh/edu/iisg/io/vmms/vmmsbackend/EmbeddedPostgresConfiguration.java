@@ -1,9 +1,9 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend;
 
-import org.postgresql.ds.PGPoolingDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.vibur.dbcp.ViburDBCPDataSource;
 import ru.yandex.qatools.embed.postgresql.PostgresExecutable;
 import ru.yandex.qatools.embed.postgresql.PostgresProcess;
 import ru.yandex.qatools.embed.postgresql.PostgresStarter;
@@ -39,15 +39,13 @@ public class EmbeddedPostgresConfiguration {
     @DependsOn("postgresProcess")
     DataSource dataSource(PostgresProcess postgresProcess) {
 
-        PGPoolingDataSource dataSource = new PGPoolingDataSource();
+        ViburDBCPDataSource ds = new ViburDBCPDataSource();
 
-        PostgresConfig postgresConfig = postgresProcess.getConfig();
-        dataSource.setUser(postgresConfig.credentials().username());
-        dataSource.setPassword(postgresConfig.credentials().password());
-        dataSource.setPortNumber(postgresConfig.net().port());
-        dataSource.setServerName(postgresConfig.net().host());
-        dataSource.setDatabaseName(postgresConfig.storage().dbName());
+        ds.setJdbcUrl("jdbc:postgresql://localhost:5432/vmms");
+        ds.setUsername("vmms_app");
+        ds.setPassword("vmms");
 
-        return dataSource;
+        ds.start();
+        return ds;
     }
 }

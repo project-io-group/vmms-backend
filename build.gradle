@@ -12,6 +12,7 @@ buildscript {
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
@@ -40,7 +41,8 @@ dependencies {
     runtime('org.springframework.boot:spring-boot-devtools')
     runtime('org.postgresql:postgresql')
     compileOnly('org.projectlombok:lombok')
-    testCompile('ru.yandex.qatools.embed:postgresql-embedded:2.9')
+    compile('ru.yandex.qatools.embed:postgresql-embedded:2.9')
+    compile('org.vibur:vibur-dbcp:22.2')
     testCompile('io.rest-assured:rest-assured:3.0.7')
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
