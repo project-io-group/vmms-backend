@@ -11,18 +11,18 @@ import org.junit.experimental.theories.DataPoint;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.UserDto;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.user.UserDto;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.user.UserRequestDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.UserService;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.restassured.RestAssured.given;
@@ -108,8 +108,7 @@ public class UserControllerIntegrationTest {
 
         //when
         Response response = request.when()
-                .body(userName)
-                .body(isAdmin)
+                .body(createUserInJson(userName, isAdmin))
                 .post(CREATE_USER_ENDPOINT);
 
         //then
@@ -144,7 +143,7 @@ public class UserControllerIntegrationTest {
         //when
         Response response = request.when()
                 .body(userId)
-                .post(DELETE_USER_ENDPOINT);
+                .delete(DELETE_USER_ENDPOINT);
 
         //then
         response.then()
@@ -162,6 +161,18 @@ public class UserControllerIntegrationTest {
 
     private List<UserDto> extractUsersList(Response response) {
         return from(response.asString()).getList("$", UserDto.class);
+    }
+
+    private UserDto extractUser(Response response) {
+        return from(response.asString()).get();
+    }
+
+    private static String createUserInJson (String name, boolean isAdmin) {
+        String s = "{ \"userName\": \"" + name + "\", " +
+                "\"isAdmin\": \"" + isAdmin + "\" }";
+
+        System.out.println(s);
+        return s;
     }
 
     private String generateRandomString() {

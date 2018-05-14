@@ -128,8 +128,8 @@ public class ReservationController {
     @RequestMapping(path = DELETE_DATES_FROM_RESERVATION_ENDPOINT, method = RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.OK)
     public void deleteDatesFromReservation (
-            @RequestBody Long reservationId,
-            @RequestBody @DateTimeFormat(pattern="yyyy-MM-dd") List<Date> cancelledDates)
+            @RequestParam Long reservationId,
+            @RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") List<Date> cancelledDates)
             throws ReservationNotFoundException, ReservationDateNotFoundException
     {
         Optional<Reservation> reservation = reservationService.findIfNotExpired(reservationId);

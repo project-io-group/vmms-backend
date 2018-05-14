@@ -1,4 +1,4 @@
-package pl.agh.edu.iisg.io.vmms.vmmsbackend.dto;
+package pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

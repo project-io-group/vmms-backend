@@ -4,13 +4,13 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.UserDto;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.user.UserDto;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.user.UserRequestDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.*;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.UserService;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -55,8 +55,9 @@ public class UserController {
 
     @RequestMapping(path = CREATE_USER_ENDPOINT, method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@RequestBody String userName, @RequestBody Boolean isAdmin) throws HttpException {
-        User user = userService.save(userName, isAdmin);
+    public UserDto createUser(@RequestBody UserRequestDto userRequest) throws HttpException {
+        System.out.println("TU " + userRequest.getUserName() + userRequest.getIsAdmin());
+        User user = userService.save(userRequest.getUserName(), userRequest.getIsAdmin());
         return new UserDto(user.getId(), user.getUserName(), user.isAdmin());
     }
 

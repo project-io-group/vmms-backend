@@ -3,7 +3,7 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.UserDto;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.user.UserDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.reservation.ReservationDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
@@ -16,8 +16,12 @@ import java.util.stream.Collectors;
 @Component
 public class ReservationConverter {
 
-    @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    public ReservationConverter(ModelMapper modelMapper){
+        this.modelMapper = modelMapper;
+    }
 
     public ReservationDto convertToDto(Reservation reservation) {
         ReservationDto dto = modelMapper.map(reservation, ReservationDto.class);
