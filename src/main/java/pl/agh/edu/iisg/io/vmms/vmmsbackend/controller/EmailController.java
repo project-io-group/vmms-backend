@@ -65,9 +65,9 @@ public class EmailController {
         static Map<String, String> subjects = new HashMap<>();
 
         static {
-            recipents.put("test", new Email("peantab@gmail.com"));
+            recipents.put("devteam", new Email("project.io.group.git.bot@gmail.com"));
 
-            subjects.put("test", "It's just a test message, you can ignore it.");
+            subjects.put("test", "Just a test message");
         }
     }
 }
