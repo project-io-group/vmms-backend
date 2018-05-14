@@ -29,3 +29,4 @@
 
 ### CI ###
 /ci/vars.yml
+sendgrid.env
