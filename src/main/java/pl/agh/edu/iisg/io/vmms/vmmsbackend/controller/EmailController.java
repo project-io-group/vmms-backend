@@ -20,8 +20,13 @@ public class EmailController {
 
     EmailController(){
         from = new Email("complaint@vmms.ki.agh.edu.pl");
-        String apiKey = System.getenv("SENDGRID_API_KEY");
-        if (apiKey.equals("")) {
+        String apiKey;
+        try {
+            apiKey = System.getenv("SENDGRID_API_KEY");
+            if (apiKey.equals("")) {
+                throw new NullPointerException();
+            }
+        } catch (NullPointerException e){
             throw new RuntimeException("Failed to access SendGrid API key! " +
                     "Please set SENDGRID_API_KEY environment variable");
         }
