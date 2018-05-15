@@ -35,18 +35,18 @@ public class EmailController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public void importFromFile(@RequestParam("recipent") String recipentKey, @RequestParam("subject") String subjectKey,
+    public void importFromFile(@RequestParam("recipient") String recipientKey, @RequestParam("subject") String subjectKey,
                                @RequestParam("content") String rawContent)
             throws InvalidEmailRequestException, MailSendingFailureException {
 
         String subject = Helper.subjects.get(subjectKey);
         if (subject == null){
-            throw new InvalidEmailRequestException("No such subject defined: '" + recipentKey + "'");
+            throw new InvalidEmailRequestException("No such subject defined: '" + recipientKey + "'");
         }
 
-        Email to = Helper.recipents.get(recipentKey);
+        Email to = Helper.recipients.get(recipientKey);
         if (to == null){
-            throw new InvalidEmailRequestException("No such recipent defined: '" + recipentKey + "'");
+            throw new InvalidEmailRequestException("No such recipent defined: '" + recipientKey + "'");
         }
 
         Content content = new Content("text/plain", rawContent);
@@ -66,11 +66,11 @@ public class EmailController {
     }
 
     private static class Helper{
-        static Map<String, Email> recipents = new HashMap<>();
+        static Map<String, Email> recipients = new HashMap<>();
         static Map<String, String> subjects = new HashMap<>();
 
         static {
-            recipents.put("devteam", new Email("project.io.group.git.bot@gmail.com"));
+            recipients.put("devteam", new Email("project.io.group.git.bot@gmail.com"));
 
             subjects.put("test", "Just a test message");
         }
