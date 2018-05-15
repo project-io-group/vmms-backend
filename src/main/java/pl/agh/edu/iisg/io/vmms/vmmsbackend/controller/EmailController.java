@@ -46,7 +46,7 @@ public class EmailController {
 
         Email to = Helper.recipients.get(recipientKey);
         if (to == null){
-            throw new InvalidEmailRequestException("No such recipent defined: '" + recipientKey + "'");
+            throw new InvalidEmailRequestException("No such recipient defined: '" + recipientKey + "'");
         }
 
         Content content = new Content("text/plain", rawContent);

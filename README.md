@@ -54,6 +54,6 @@ Parameters for connecting with external software can be read from `docker-compos
 (Date format is `yyyy-MM-dd HH:mm`)
 
 ### You can send e-mail by POSTing at:
-`http://localhost:9045/email?recipent=definedRecipent&subject=definedSubject&content=URL-encodedContent`
+`http://localhost:9045/email?recipient=definedRecipient&subject=definedSubject&content=URL-encodedContent`
 
 For this to work you have to set `SENDGRID_API_KEY` environment variable with *SendGrid* API key. If you're working in IntelliJ, you have to set it in `Run`/`Edit Configurations` window, as system-wide variables are getting overwritten.
