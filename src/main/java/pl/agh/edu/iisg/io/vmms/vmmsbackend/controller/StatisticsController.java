@@ -22,7 +22,7 @@ public class StatisticsController {
 
     private static final String HOURLY_USAGE_ENDPOINT = "/hourly";
     private static final String WEEKDAYS_HOURLY_USAGE_ENDPOINT = "/weekdays";
-    private static final String MONTHS_HOURLY_USAGE_ENDPOINT = "/months";
+    private static final String MONTHS_HOURLY_USAGE_ENDPOINT = "/monthly";
 
     private StatisticsService statisticsService;
 

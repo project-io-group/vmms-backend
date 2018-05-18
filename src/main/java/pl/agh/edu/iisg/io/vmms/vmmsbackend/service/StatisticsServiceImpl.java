@@ -65,7 +65,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                 Date end = ( period.getEndDate().before(to) ) ? period.getEndDate() : to;
 
                 calendar.setTime(start);
-                DayOfWeek dayOfWeek = DayOfWeek.of(calendar.get(Calendar.DAY_OF_WEEK)+1); // why calendar is 0 based grr
+                DayOfWeek dayOfWeek = DayOfWeek.of(calendar.get(Calendar.DAY_OF_WEEK)); // why calendar is 0 based grr
 
                 double hours = (end.getTime() - start.getTime()) / TIME_TO_HOURS_FACTOR;
                 usageInWeek.put(dayOfWeek,
