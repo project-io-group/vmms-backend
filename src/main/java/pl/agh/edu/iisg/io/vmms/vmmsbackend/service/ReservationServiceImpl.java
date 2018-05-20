@@ -2,6 +2,7 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
@@ -51,6 +52,7 @@ public class ReservationServiceImpl implements ReservationService {
                 .getAllValidByDatesBetweenForVMPool(new Date(), from, to, vmPoolShortName);
     }
 
+    @Transactional
     @Override
     public Reservation saveTemporary(Reservation reservation,
                               Date startTime,
@@ -101,6 +103,11 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public void deletePeriod(ReservationPeriod period){
         reservationPeriodRepository.delete(period);
+    }
+
+    @Override
+    public void deleteExpiredOrEmptyReservations() {
+        reservationRepository.deleteExpiredOrEmptyReservations(new Date());
     }
 
     private boolean isReservationPeriodValid(

@@ -29,4 +29,6 @@ public interface ReservationService {
     void delete(Reservation reservation);
 
     void deletePeriod(ReservationPeriod period);
+
+    void deleteExpiredOrEmptyReservations();
 }
