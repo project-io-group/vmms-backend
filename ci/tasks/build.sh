@@ -11,3 +11,6 @@ export TERM=xterm
 echo "Build artifacts: "
 ls -la ./build
 ls -la ./build/libs
+
+cp ./build/* ../build
+ls -la ../build
