@@ -12,5 +12,5 @@ echo "Build artifacts: "
 ls -la ./build
 ls -la ./build/libs
 
-cp ./build/* ../build
+cp ./build/libs/* ../build
 ls -la ../build
