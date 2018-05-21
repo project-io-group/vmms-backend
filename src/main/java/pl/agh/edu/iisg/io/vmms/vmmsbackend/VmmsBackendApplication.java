@@ -5,6 +5,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @SpringBootApplication
 public class VmmsBackendApplication {
 
@@ -14,6 +17,14 @@ public class VmmsBackendApplication {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(VmmsBackendApplication.class, args);
+        SpringApplication app = new SpringApplication(VmmsBackendApplication.class);
+        addDefaultProfile(app);
+        app.run(args);
+    }
+
+    private static void addDefaultProfile(SpringApplication app) {
+        Map<String, Object> defProperties =  new HashMap<>();
+        defProperties.put("spring.profiles.default", "dev");
+        app.setDefaultProperties(defProperties);
     }
 }
