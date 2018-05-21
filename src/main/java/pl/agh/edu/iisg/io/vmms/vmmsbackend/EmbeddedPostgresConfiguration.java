@@ -1,8 +1,10 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Profile;
 import org.vibur.dbcp.ViburDBCPDataSource;
 import ru.yandex.qatools.embed.postgresql.PostgresExecutable;
 import ru.yandex.qatools.embed.postgresql.PostgresProcess;
@@ -14,18 +16,31 @@ import ru.yandex.qatools.embed.postgresql.distribution.Version;
 import javax.sql.DataSource;
 import java.io.IOException;
 
+@Profile("dev")
 @Configuration
 public class EmbeddedPostgresConfiguration {
+
+    @Value("${spring.datasource.url}")
+    private String URL;
+    @Value("${spring.datasource.username}")
+    private String USERNAME;
+    @Value("${spring.datasource.password}")
+    private String PASSWORD;
 
     @Bean(destroyMethod = "stop")
     public PostgresProcess postgresProcess() throws IOException {
 
+        String url = URL.split("//", 2)[1];
+        String host = url.split(":", 2)[0];
+        int port = Integer.valueOf(url.split(":", 2)[1].split("/", 2)[0]);
+        String dbName = url.split(":", 2)[1].split("/", 2)[1];
+
         PostgresConfig postgresConfig = new PostgresConfig(
                 Version.V9_6_8,
-                new AbstractPostgresConfig.Net("localhost", 5432),
-                new AbstractPostgresConfig.Storage("vmms"),
+                new AbstractPostgresConfig.Net(host, port),
+                new AbstractPostgresConfig.Storage(dbName),
                 new AbstractPostgresConfig.Timeout(),
-                new AbstractPostgresConfig.Credentials("vmms_app", "vmms")
+                new AbstractPostgresConfig.Credentials(USERNAME, PASSWORD)
         );
 
         PostgresStarter<PostgresExecutable, PostgresProcess> runtime = PostgresStarter.getDefaultInstance();
@@ -41,9 +56,9 @@ public class EmbeddedPostgresConfiguration {
 
         ViburDBCPDataSource ds = new ViburDBCPDataSource();
 
-        ds.setJdbcUrl("jdbc:postgresql://localhost:5432/vmms");
-        ds.setUsername("vmms_app");
-        ds.setPassword("vmms");
+        ds.setJdbcUrl(URL);
+        ds.setUsername(USERNAME);
+        ds.setPassword(PASSWORD);
 
         ds.start();
         return ds;
