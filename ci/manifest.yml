@@ -9,3 +9,5 @@ applications:
   services:
   - postgresql-vmms-backend
   buildpack: java_buildpack
+  env:
+    SPRING_PROFILES_ACTIVE: prod
