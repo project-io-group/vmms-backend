@@ -9,4 +9,6 @@ export TERM=xterm
 ./gradlew clean build
 
 echo "Build artifacts: "
+ls -la .
 ls -la ./build
+ls -la ./out
