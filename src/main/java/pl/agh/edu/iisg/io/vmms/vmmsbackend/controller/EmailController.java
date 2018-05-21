@@ -35,7 +35,7 @@ public class EmailController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public void importFromFile(@RequestParam("recipient") String recipientKey, @RequestParam("subject") String subjectKey,
+    public void sendMail(@RequestParam("recipient") String recipientKey, @RequestParam("subject") String subjectKey,
                                @RequestParam("content") String rawContent)
             throws InvalidEmailRequestException, MailSendingFailureException {
 
