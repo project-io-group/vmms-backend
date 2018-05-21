@@ -15,9 +15,11 @@ public class MailSubject {
     private Long id;
 
     @Column(nullable = false)
+    private String subjectKey;
+
     private String subject;
 
     @ManyToOne
-    @JoinColumn(name = "subjects")
+    @JoinColumn
     private VMAdmin admin;
 }

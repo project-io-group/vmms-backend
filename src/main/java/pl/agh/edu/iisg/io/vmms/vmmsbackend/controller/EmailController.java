@@ -1,11 +1,18 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import com.sendgrid.*;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.InvalidEmailConfigurationException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.InvalidEmailRequestException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.MailSendingFailureException;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.MailSubject;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMAdmin;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.EmailConfigurationDTO;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.MailSubjectService;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.VMAdminService;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -18,7 +25,14 @@ public class EmailController {
     private final Email from;
     private final SendGrid sg;
 
-    EmailController(){
+    private final MailSubjectService mailSubjectService;
+    private final VMAdminService vmAdminService;
+
+    @Autowired
+    EmailController(MailSubjectService mailSubjectService, VMAdminService vmAdminService){
+        this.mailSubjectService = mailSubjectService;
+        this.vmAdminService = vmAdminService;
+
         from = new Email("complaint@vmms.ki.agh.edu.pl");
         String apiKey;
         try {
@@ -35,19 +49,16 @@ public class EmailController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
-    public void sendMail(@RequestParam("recipient") String recipientKey, @RequestParam("subject") String subjectKey,
-                               @RequestParam("content") String rawContent)
+    public void sendMail(@RequestParam("subject") String subjectKey,
+                         @RequestParam("content") String rawContent)
             throws InvalidEmailRequestException, MailSendingFailureException {
-
-        String subject = Helper.subjects.get(subjectKey);
-        if (subject == null){
-            throw new InvalidEmailRequestException("No such subject defined: '" + recipientKey + "'");
+        MailSubject mailSubject = mailSubjectService.find(subjectKey);
+        if (mailSubject == null){
+            throw new InvalidEmailRequestException("No such subject defined: '" + subjectKey + "'");
         }
+        String subject = mailSubject.getSubject();
 
-        Email to = Helper.recipients.get(recipientKey);
-        if (to == null){
-            throw new InvalidEmailRequestException("No such recipent defined: '" + recipientKey + "'");
-        }
+        Email to = new Email(mailSubject.getAdmin().getEMail());
 
         Content content = new Content("text/plain", rawContent);
         Mail mail = new Mail(from, subject, to, content);
@@ -65,14 +76,34 @@ public class EmailController {
         }
     }
 
-    private static class Helper{
-        static Map<String, Email> recipients = new HashMap<>();
-        static Map<String, String> subjects = new HashMap<>();
+    @RequestMapping(method = RequestMethod.POST, path = "configure")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void importConfig(@RequestBody EmailConfigurationDTO json) throws InvalidEmailConfigurationException {
+        mailSubjectService.drop();
+        vmAdminService.drop();
 
-        static {
-            recipients.put("devteam", new Email("project.io.group.git.bot@gmail.com"));
-
-            subjects.put("test", "Just a test message");
+        try {
+            Map<String, VMAdmin> admins = new HashMap<>();
+            for (EmailConfigurationDTO.Admin adminDto : json.admins) {
+                VMAdmin admin = new VMAdmin();
+                admin.setName(adminDto.name);
+                admin.setEMail(adminDto.mail);
+                admins.put(adminDto.name, vmAdminService.save(admin));
+            }
+            for (EmailConfigurationDTO.Subject subjectDto : json.subjects) {
+                MailSubject subject = new MailSubject();
+                subject.setSubjectKey(subjectDto.key);
+                subject.setSubject(subjectDto.subject);
+                VMAdmin admin = admins.get(subjectDto.admin);
+                if (admin == null)
+                    throw new InvalidEmailConfigurationException("Subject assigned to non-existing admin " + subjectDto.admin);
+                subject.setAdmin(admin);
+                mailSubjectService.save(subject);
+            }
+        }catch (InvalidEmailConfigurationException e){
+            mailSubjectService.drop();
+            vmAdminService.drop();
+            throw e;
         }
     }
 }

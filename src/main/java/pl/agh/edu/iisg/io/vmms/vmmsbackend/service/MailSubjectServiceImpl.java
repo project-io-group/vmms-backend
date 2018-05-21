@@ -17,11 +17,21 @@ public class MailSubjectServiceImpl implements MailSubjectService {
 
     @Override
     public MailSubject find(String subject) {
-        return mailSubjectRepository.findFirstBySubject(subject);
+        return mailSubjectRepository.findFirstBySubjectKey(subject);
     }
 
     @Override
     public MailSubject find(Long id) {
         return mailSubjectRepository.getOne(id);
+    }
+
+    @Override
+    public void drop(){
+        mailSubjectRepository.deleteAll();
+    }
+
+    @Override
+    public MailSubject save(MailSubject mailSubject) {
+        return mailSubjectRepository.save(mailSubject);
     }
 }

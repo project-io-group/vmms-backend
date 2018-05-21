@@ -24,4 +24,14 @@ public class VMAdminServiceImpl implements VMAdminService {
     public VMAdmin find(Long id) {
         return vmAdminRepository.getOne(id);
     }
+
+    @Override
+    public void drop(){
+        vmAdminRepository.deleteAll();
+    }
+
+    @Override
+    public VMAdmin save(VMAdmin vmAdmin) {
+        return vmAdminRepository.save(vmAdmin);
+    }
 }

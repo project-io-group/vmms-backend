@@ -1,0 +1,29 @@
+{
+    "admins": [
+        {
+            "name": "devteam",
+            "mail": "project.io.group.git.bot@gmail.com"
+        },
+        {
+            "name": "Nobody",
+            "mail": "nobody@example.com"
+        }
+    ],
+    "subjects": [
+        {
+            "key": "test",
+            "subject": "Just a test message",
+            "admin": "devteam"
+        },
+        {
+            "key": "bzdury",
+            "subject": "Lorem Ipsum",
+            "admin": "devteam"
+        },
+        {
+            "key": "wazne",
+            "subject": "Coś niezmiernie ważnego",
+            "admin": "Nobody"
+        }
+    ]
+}
