@@ -4,7 +4,6 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.user.UserLoginRequestDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.user.UserSignUpRequestDto;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.HttpException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.MissingUserIdException;
@@ -21,7 +20,6 @@ import java.util.Optional;
 @RestController
 public class UserController {
 
-    private static final String NAME = "name";
     private static final String USER_ID = "userId";
 
     private final UserService userService;
@@ -49,27 +47,21 @@ public class UserController {
     }
 
     @PostMapping(SecurityConstants.SIGN_UP_URL)
-    public void signUp(@RequestBody UserSignUpRequestDto registerRequest) {
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    public String signUp(@RequestBody UserSignUpRequestDto registerRequest) {
         // we are using email as the username fullName parameter should not be used as username
         // because it is optional. Currently fullname is not stored at all
-        ApplicationUser applicationUser = new ApplicationUser();
-        applicationUser.setUserName(registerRequest.getEmail());
-        applicationUser.setEmail(registerRequest.getEmail());
-        applicationUser.setPassword(bCryptPasswordEncoder.encode(registerRequest.getPassword()));
 
-        userService.save(applicationUser);
-    }
+        if (userService.find(registerRequest.getEmail()) == null) {
+            ApplicationUser applicationUser = new ApplicationUser();
+            applicationUser.setUserName(registerRequest.getEmail());
+            applicationUser.setEmail(registerRequest.getEmail());
+            applicationUser.setPassword(bCryptPasswordEncoder.encode(registerRequest.getPassword()));
 
-    @PostMapping(SecurityConstants.LOGIN_URL)
-    public void login(@RequestBody UserLoginRequestDto loginRequest) {
-        //TODO implement the logic of signing in (loginRequest have all JSON fields)
-    }
-
-    @RequestMapping(path = "/user/create", method = RequestMethod.POST)
-    @ResponseStatus(HttpStatus.CREATED)
-    public ApplicationUser createUser(@RequestBody Map<String, String> request) throws HttpException {
-        String userName = Optional.ofNullable(request.get(NAME)).orElseThrow(MissingUserIdException::new);
-        return userService.save(userName);
+            userService.save(applicationUser);
+        }
+        return "created";
     }
 
     @RequestMapping(path = "/user/delete", method = RequestMethod.POST)
