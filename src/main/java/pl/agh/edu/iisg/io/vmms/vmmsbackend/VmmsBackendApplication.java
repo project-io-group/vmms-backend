@@ -16,6 +16,18 @@ import java.util.Map;
 @EnableScheduling
 public class VmmsBackendApplication {
 
+    public static void main(String[] args) {
+        SpringApplication app = new SpringApplication(VmmsBackendApplication.class);
+        addDefaultProfile(app);
+        app.run(args);
+    }
+
+    private static void addDefaultProfile(SpringApplication app) {
+        Map<String, Object> defProperties = new HashMap<>();
+        defProperties.put("spring.profiles.default", "dev");
+        app.setDefaultProperties(defProperties);
+    }
+
     @Bean
     ReservationCleanupTask reservationCleanupTask() {
         return new ReservationCleanupTask();
@@ -24,17 +36,5 @@ public class VmmsBackendApplication {
     @Bean
     ModelMapper modelMapper() {
         return new ModelMapper();
-    }
-
-    public static void main(String[] args) {
-        SpringApplication app = new SpringApplication(VmmsBackendApplication.class);
-        addDefaultProfile(app);
-        app.run(args);
-    }
-
-    private static void addDefaultProfile(SpringApplication app) {
-        Map<String, Object> defProperties =  new HashMap<>();
-        defProperties.put("spring.profiles.default", "dev");
-        app.setDefaultProperties(defProperties);
     }
 }
