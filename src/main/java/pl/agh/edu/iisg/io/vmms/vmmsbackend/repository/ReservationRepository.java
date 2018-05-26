@@ -1,10 +1,11 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
+import org.springframework.transaction.annotation.Transactional;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
 
 import java.util.Date;
@@ -41,4 +42,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "and (r.confirmationDate is not null or r.deadlineToConfirm > :now)")
     Optional<Reservation> getIfConfirmedOrBeforeDeadline(@Param("id") Long id, @Param("now") Date now);
 
+    @Transactional
+    @Modifying
+    @Query(value = "delete from Reservation as r " +
+            "where r.deadlineToConfirm < :now " +
+            "or size(r.periods) = 0")
+    void deleteExpiredOrEmptyReservations(@Param("now") Date now);
 }
