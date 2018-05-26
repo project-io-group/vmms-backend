@@ -52,4 +52,8 @@ Parameters for connecting with external software can be read from `docker-compos
 `http://localhost:9045/reservation?reservationId=reservation_id`  (get reservation with given id)    
 
 (Date format is `yyyy-MM-dd HH:mm`)
-  
+
+### Putting things together:
++ generate prod version of frontend
++ put all files from `dist` directory to `src/main/resources/static` directory
++ put `http://localhost:9045/index.html` in your browser
