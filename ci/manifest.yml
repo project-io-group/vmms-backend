@@ -6,8 +6,6 @@ applications:
   routes:
   - route: vmms-backend.cfapps.io
   stack: cflinuxfs2
-  services:
-  - postgresql-vmms-backend
   buildpack: java_buildpack
   env:
     SPRING_PROFILES_ACTIVE: prod
