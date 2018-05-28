@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Data
 @Entity
@@ -14,7 +15,7 @@ public class MailSubject {
     @GeneratedValue
     private Long id;
 
-    @Column(nullable = false)
+    @NotNull
     private String subjectKey;
 
     private String subject;
