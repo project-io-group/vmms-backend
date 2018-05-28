@@ -20,7 +20,4 @@ public class VMAdmin {
 
     @Column(nullable = false)
     private String eMail;
-
-    @OneToMany(mappedBy = "admin")
-    public Set<MailSubject> subjects;
 }

@@ -18,8 +18,4 @@ public class MailSubject {
     private String subjectKey;
 
     private String subject;
-
-    @ManyToOne
-    @JoinColumn
-    private VMAdmin admin;
 }

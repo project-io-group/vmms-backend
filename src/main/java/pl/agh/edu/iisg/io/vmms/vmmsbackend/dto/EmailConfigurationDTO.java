@@ -15,7 +15,6 @@ public class EmailConfigurationDTO {
     public static class Subject {
         public String key;
         public String subject;
-        public String admin;
     }
 
     @NoArgsConstructor

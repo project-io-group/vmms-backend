@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import com.sendgrid.*;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.InvalidEmailConfigurationException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.InvalidEmailRequestException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.MailSendingFailureException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.MailSubject;
@@ -15,8 +14,7 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.MailSubjectService;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.VMAdminService;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @CrossOrigin("*")
 @RestController
@@ -58,52 +56,45 @@ public class EmailController {
         }
         String subject = mailSubject.getSubject();
 
-        Email to = new Email(mailSubject.getAdmin().getEMail());
-
         Content content = new Content("text/plain", rawContent);
-        Mail mail = new Mail(from, subject, to, content);
-        Request request = new Request();
-        try {
-            request.setMethod(Method.POST);
-            request.setEndpoint("mail/send");
-            request.setBody(mail.build());
-            Response response = sg.api(request);
-            System.out.println(response.getStatusCode());
-            System.out.println(response.getBody());
-            System.out.println(response.getHeaders());
-        } catch (IOException ex) {
-            throw new MailSendingFailureException(ex);
+
+        List<VMAdmin> vmAdmins = vmAdminService.getVmAdmins();
+        for(VMAdmin vmAdmin: vmAdmins){
+            Email to = new Email(vmAdmin.getEMail(), vmAdmin.getName());
+
+            Mail mail = new Mail(from, subject, to, content);
+            Request request = new Request();
+            try {
+                request.setMethod(Method.POST);
+                request.setEndpoint("mail/send");
+                request.setBody(mail.build());
+                Response response = sg.api(request);
+                int status = response.getStatusCode();
+                if (status < 200 || status > 299)
+                    throw new MailSendingFailureException("API returned HTTP status " + status);
+            } catch (IOException ex) {
+                throw new MailSendingFailureException(ex);
+            }
         }
     }
 
     @RequestMapping(method = RequestMethod.POST, path = "configure")
     @ResponseStatus(HttpStatus.CREATED)
-    public void importConfig(@RequestBody EmailConfigurationDTO json) throws InvalidEmailConfigurationException {
+    public void importConfig(@RequestBody EmailConfigurationDTO json) {
         mailSubjectService.drop();
         vmAdminService.drop();
 
-        try {
-            Map<String, VMAdmin> admins = new HashMap<>();
-            for (EmailConfigurationDTO.Admin adminDto : json.admins) {
-                VMAdmin admin = new VMAdmin();
-                admin.setName(adminDto.name);
-                admin.setEMail(adminDto.mail);
-                admins.put(adminDto.name, vmAdminService.save(admin));
-            }
-            for (EmailConfigurationDTO.Subject subjectDto : json.subjects) {
-                MailSubject subject = new MailSubject();
-                subject.setSubjectKey(subjectDto.key);
-                subject.setSubject(subjectDto.subject);
-                VMAdmin admin = admins.get(subjectDto.admin);
-                if (admin == null)
-                    throw new InvalidEmailConfigurationException("Subject assigned to non-existing admin " + subjectDto.admin);
-                subject.setAdmin(admin);
-                mailSubjectService.save(subject);
-            }
-        }catch (InvalidEmailConfigurationException e){
-            mailSubjectService.drop();
-            vmAdminService.drop();
-            throw e;
+        for (EmailConfigurationDTO.Admin adminDto : json.admins) {
+            VMAdmin admin = new VMAdmin();
+            admin.setName(adminDto.name);
+            admin.setEMail(adminDto.mail);
+            vmAdminService.save(admin);
+        }
+        for (EmailConfigurationDTO.Subject subjectDto : json.subjects) {
+            MailSubject subject = new MailSubject();
+            subject.setSubjectKey(subjectDto.key);
+            subject.setSubject(subjectDto.subject);
+            mailSubjectService.save(subject);
         }
     }
 }

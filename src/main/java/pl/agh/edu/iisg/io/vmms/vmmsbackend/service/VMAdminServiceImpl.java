@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMAdmin;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.VMAdminRepository;
 
+import java.util.List;
+
 @Service
 public class VMAdminServiceImpl implements VMAdminService {
 
@@ -33,5 +35,10 @@ public class VMAdminServiceImpl implements VMAdminService {
     @Override
     public VMAdmin save(VMAdmin vmAdmin) {
         return vmAdminRepository.save(vmAdmin);
+    }
+
+    @Override
+    public List<VMAdmin> getVmAdmins() {
+        return vmAdminRepository.findAll();
     }
 }

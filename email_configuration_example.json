@@ -12,18 +12,15 @@
     "subjects": [
         {
             "key": "test",
-            "subject": "Just a test message",
-            "admin": "devteam"
+            "subject": "Just a test message"
         },
         {
             "key": "bzdury",
-            "subject": "Lorem Ipsum",
-            "admin": "devteam"
+            "subject": "Lorem Ipsum"
         },
         {
             "key": "wazne",
-            "subject": "Coś niezmiernie ważnego",
-            "admin": "Nobody"
+            "subject": "Coś niezmiernie ważnego"
         }
     ]
 }

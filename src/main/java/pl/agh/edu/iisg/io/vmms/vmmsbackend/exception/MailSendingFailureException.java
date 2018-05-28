@@ -12,4 +12,8 @@ public class MailSendingFailureException extends Exception {
     public MailSendingFailureException(Throwable exception) {
         super(exception);
     }
+
+    public MailSendingFailureException(String message) {
+        super(message);
+    }
 }

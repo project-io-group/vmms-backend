@@ -61,4 +61,4 @@ For this to work you have to set `SENDGRID_API_KEY` environment variable with *S
 **WARNING: the app WON'T RUN at all without the above mentioned ENVIRONMENT VARIABLE!!!**
 
 #### Defining e-mail subjects and recipients
-You can define e-mail subjects and recipients by **POST**ing at `/email/configure` with `Content-Type: application/json` a JSON of which example is in the `email_configuration_example.json` as a request body. Each new configuration overwrites the previous one, incorrect configurations cause removal of an existing configuration.
+You can define e-mail subjects and recipients by **POST**ing at `/email/configure` with `Content-Type: application/json` a JSON of which example is in the `email_configuration_example.json` as a request body. Each new configuration overwrites the previous one.
