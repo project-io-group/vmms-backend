@@ -9,9 +9,7 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.StatisticsService;
 
 import java.time.DayOfWeek;
-import java.time.LocalDateTime;
 import java.time.Month;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,7 +20,7 @@ public class StatisticsController {
 
     private static final String HOURLY_USAGE_ENDPOINT = "/hourly";
     private static final String WEEKDAYS_HOURLY_USAGE_ENDPOINT = "/weekdays";
-    private static final String MONTHS_HOURLY_USAGE_ENDPOINT = "/months";
+    private static final String MONTHS_HOURLY_USAGE_ENDPOINT = "/monthly";
 
     private StatisticsService statisticsService;
 
@@ -34,10 +32,11 @@ public class StatisticsController {
     @RequestMapping(path = HOURLY_USAGE_ENDPOINT, method = RequestMethod.GET)
     public List<StatsDataPointDto> getHoursUsageInInterval(
             @RequestParam("from") @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
-            @RequestParam("to") @DateTimeFormat(pattern = "yyyy-MM-dd") Date to) {
+            @RequestParam("to") @DateTimeFormat(pattern = "yyyy-MM-dd") Date to,
+            @RequestParam("includeDisabled") Boolean includeDisabled) {
         to = addOneDay(to);
         Map<VMPool, Double> usageMap =
-                statisticsService.getHourlyUsageInIntervalByVMPool(from, to);
+                statisticsService.getHourlyUsageInIntervalByVMPool(from, to, includeDisabled);
         return usageMap
                 .entrySet()
                 .stream()
@@ -52,10 +51,11 @@ public class StatisticsController {
     @RequestMapping(path = WEEKDAYS_HOURLY_USAGE_ENDPOINT, method = RequestMethod.GET)
     public List<StatsDataPointsDto> getWeekdaysHourlyUsageInInterval(
             @RequestParam("from") @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
-            @RequestParam("to") @DateTimeFormat(pattern = "yyyy-MM-dd") Date to) {
+            @RequestParam("to") @DateTimeFormat(pattern = "yyyy-MM-dd") Date to,
+            @RequestParam("includeDisabled") Boolean includeDisabled) {
         to = addOneDay(to);
         Map<VMPool, SortedMap<DayOfWeek, Double>> usageMap =
-                statisticsService.getHourlyUsageInIntervalByVMPoolAndDayOfWeek(from, to);
+                statisticsService.getHourlyUsageInIntervalByVMPoolAndDayOfWeek(from, to, includeDisabled);
         return usageMap
                 .entrySet()
                 .stream()
@@ -70,10 +70,11 @@ public class StatisticsController {
     @RequestMapping(path = MONTHS_HOURLY_USAGE_ENDPOINT, method = RequestMethod.GET)
     public List<StatsDataPointsDto> getMonthsHourlyUsageInInterval(
             @RequestParam("from") @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
-            @RequestParam("to") @DateTimeFormat(pattern = "yyyy-MM-dd") Date to) {
+            @RequestParam("to") @DateTimeFormat(pattern = "yyyy-MM-dd") Date to,
+            @RequestParam("includeDisabled") Boolean includeDisabled) {
         to = addOneDay(to);
         Map<VMPool, SortedMap<Month, Double>> usageMap =
-                statisticsService.getHourlyUsageInIntervalByVMPoolAndMonth(from, to);
+                statisticsService.getHourlyUsageInIntervalByVMPoolAndMonth(from, to, includeDisabled);
         return usageMap
                 .entrySet()
                 .stream()

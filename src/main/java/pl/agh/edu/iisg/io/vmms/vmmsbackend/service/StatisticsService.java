@@ -10,11 +10,11 @@ import java.util.SortedMap;
 
 public interface StatisticsService {
 
-    Map<VMPool, Double> getHourlyUsageInIntervalByVMPool(Date from, Date to);
+    Map<VMPool, Double> getHourlyUsageInIntervalByVMPool(Date from, Date to, Boolean includeDisabled);
 
     Map<VMPool, SortedMap<DayOfWeek, Double>>
-    getHourlyUsageInIntervalByVMPoolAndDayOfWeek(Date from, Date to);
+    getHourlyUsageInIntervalByVMPoolAndDayOfWeek(Date from, Date to, Boolean includeDisabled);
 
     Map<VMPool, SortedMap<Month, Double>>
-    getHourlyUsageInIntervalByVMPoolAndMonth(Date from, Date to);
+    getHourlyUsageInIntervalByVMPoolAndMonth(Date from, Date to, Boolean includeDisabled);
 }
