@@ -36,17 +36,10 @@ public class StatisticsController {
             @RequestParam("includeDisabled") Boolean includeDisabled) {
         to = addOneDay(to);
         Map<VMPool, Double> usageMap =
-                statisticsService.getHourlyUsageInIntervalByVMPool(from, to);
+                statisticsService.getHourlyUsageInIntervalByVMPool(from, to, includeDisabled);
         return usageMap
                 .entrySet()
                 .stream()
-                .filter(entry -> {
-                    if (includeDisabled) {
-                        return true;
-                    } else {
-                        return entry.getKey().getEnabled();
-                    }
-                })
                 .map(entry -> new StatsDataPointDto(
                         entry.getKey().getDisplayName(),
                         entry.getValue()
@@ -62,17 +55,10 @@ public class StatisticsController {
             @RequestParam("includeDisabled") Boolean includeDisabled) {
         to = addOneDay(to);
         Map<VMPool, SortedMap<DayOfWeek, Double>> usageMap =
-                statisticsService.getHourlyUsageInIntervalByVMPoolAndDayOfWeek(from, to);
+                statisticsService.getHourlyUsageInIntervalByVMPoolAndDayOfWeek(from, to, includeDisabled);
         return usageMap
                 .entrySet()
                 .stream()
-                .filter(entry -> {
-                    if (includeDisabled) {
-                        return true;
-                    } else {
-                        return entry.getKey().getEnabled();
-                    }
-                })
                 .map(entry -> new StatsDataPointsDto(
                                 entry.getKey().getDisplayName(),
                                 new ArrayList<>(entry.getValue().values())
@@ -88,17 +74,10 @@ public class StatisticsController {
             @RequestParam("includeDisabled") Boolean includeDisabled) {
         to = addOneDay(to);
         Map<VMPool, SortedMap<Month, Double>> usageMap =
-                statisticsService.getHourlyUsageInIntervalByVMPoolAndMonth(from, to);
+                statisticsService.getHourlyUsageInIntervalByVMPoolAndMonth(from, to, includeDisabled);
         return usageMap
                 .entrySet()
                 .stream()
-                .filter(entry -> {
-                    if (includeDisabled) {
-                        return true;
-                    } else {
-                        return entry.getKey().getEnabled();
-                    }
-                })
                 .map(entry -> new StatsDataPointsDto(
                        entry.getKey().getDisplayName(),
                        new ArrayList<>(entry.getValue().values())
