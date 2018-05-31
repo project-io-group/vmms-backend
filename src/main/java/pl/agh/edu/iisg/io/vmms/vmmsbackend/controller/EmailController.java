@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import com.sendgrid.*;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.SubjectConfigurationDTO;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.InvalidEmailRequestException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.MailSendingFailureException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.MailSubject;
@@ -78,10 +79,9 @@ public class EmailController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.POST, path = "configure")
+    @RequestMapping(method = RequestMethod.POST, path = "configure/admins")
     @ResponseStatus(HttpStatus.CREATED)
-    public void importConfig(@RequestBody EmailConfigurationDTO json) {
-        mailSubjectService.drop();
+    public void importAdminsConfig(@RequestBody EmailConfigurationDTO json) {
         vmAdminService.drop();
 
         for (EmailConfigurationDTO.Admin adminDto : json.admins) {
@@ -90,7 +90,14 @@ public class EmailController {
             admin.setEMail(adminDto.mail);
             vmAdminService.save(admin);
         }
-        for (EmailConfigurationDTO.Subject subjectDto : json.subjects) {
+    }
+
+    @RequestMapping(method = RequestMethod.POST, path = "configure/subjects")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void importConfig(@RequestBody SubjectConfigurationDTO json) {
+        mailSubjectService.drop();
+
+        for (SubjectConfigurationDTO.Subject subjectDto : json.subjects) {
             MailSubject subject = new MailSubject();
             subject.setSubjectKey(subjectDto.key);
             subject.setSubject(subjectDto.subject);

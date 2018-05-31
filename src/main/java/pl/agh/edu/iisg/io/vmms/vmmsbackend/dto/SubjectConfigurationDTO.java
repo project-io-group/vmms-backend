@@ -7,13 +7,13 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class EmailConfigurationDTO {
-    public List<Admin> admins;
+public class SubjectConfigurationDTO {
+    public List<Subject> subjects;
 
     @NoArgsConstructor
-    public static class Admin {
-        public String name;
-        public String mail;
+    public static class Subject {
+        public String key;
+        public String subject;
     }
 }
 
