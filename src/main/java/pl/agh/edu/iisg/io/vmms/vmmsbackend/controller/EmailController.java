@@ -4,46 +4,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import com.sendgrid.*;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.SubjectConfigurationDTO;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.InvalidEmailRequestException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.MailSendingFailureException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.MailSubject;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMAdmin;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.EmailConfigurationDTO;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.MailService;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.MailSubjectService;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.VMAdminService;
 
-import java.io.IOException;
 import java.util.List;
 
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/email")
 public class EmailController {
-    private final Email from;
-    private final SendGrid sg;
-
     private final MailSubjectService mailSubjectService;
     private final VMAdminService vmAdminService;
+    private final MailService mailService;
 
     @Autowired
-    EmailController(MailSubjectService mailSubjectService, VMAdminService vmAdminService){
+    EmailController(MailSubjectService mailSubjectService, VMAdminService vmAdminService, MailService mailService){
         this.mailSubjectService = mailSubjectService;
         this.vmAdminService = vmAdminService;
-
-        from = new Email("complaint@vmms.ki.agh.edu.pl");
-        String apiKey;
-        try {
-            apiKey = System.getenv("SENDGRID_API_KEY");
-            if (apiKey.equals("")) {
-                throw new NullPointerException();
-            }
-        } catch (NullPointerException e){
-            throw new RuntimeException("Failed to access SendGrid API key! " +
-                    "Please set SENDGRID_API_KEY environment variable");
-        }
-        sg = new SendGrid(apiKey);
+        this.mailService = mailService;
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -57,25 +42,9 @@ public class EmailController {
         }
         String subject = mailSubject.getSubject();
 
-        Content content = new Content("text/plain", rawContent);
-
         List<VMAdmin> vmAdmins = vmAdminService.getVmAdmins();
         for(VMAdmin vmAdmin: vmAdmins){
-            Email to = new Email(vmAdmin.getEMail(), vmAdmin.getName());
-
-            Mail mail = new Mail(from, subject, to, content);
-            Request request = new Request();
-            try {
-                request.setMethod(Method.POST);
-                request.setEndpoint("mail/send");
-                request.setBody(mail.build());
-                Response response = sg.api(request);
-                int status = response.getStatusCode();
-                if (status < 200 || status > 299)
-                    throw new MailSendingFailureException("API returned HTTP status " + status);
-            } catch (IOException ex) {
-                throw new MailSendingFailureException(ex);
-            }
+            mailService.sendMail(subject, rawContent, vmAdmin.getEMail(), vmAdmin.getName());
         }
     }
 
