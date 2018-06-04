@@ -56,26 +56,67 @@ public class VMPoolController {
 
                 VMPoolCSVParser parser = new VMPoolCSVParser();
 
+                List<VMPool> vmPools = vmPoolService.getVMPools();
+
                 while ((line = bufferedReader.readLine()) != null) {
                     Optional<VMPool> o = parser.parseLine(line);
-                    if(o.isPresent()) {
+                    if (o.isPresent()) {
                         System.out.println("parsed");
-                        try{
-                            vmPoolService.save(o.get());
-                        }catch (Exception e){
+                        VMPool newPool = o.get();
+                        VMPool found = vmPoolService.find(newPool.getShortName());
+                        try {
+                            if (found != null) {
+                                vmPools.remove(found);
+                                boolean changed = false;
+                                if (!found.getDisplayName().equals(newPool.getDisplayName())) {
+                                    found.setDisplayName(newPool.getDisplayName());
+                                    changed = true;
+                                }
+                                if (!found.getMaximumCount().equals(newPool.getMaximumCount())) {
+                                    boolean anyMatch = found.getReservations().stream().anyMatch(r -> r.getMachinesNumber() > newPool.getMaximumCount());
+                                    if (anyMatch) {
+                                        throw new VMPoolImportFileException("Can not decrease pool count with trailing reservations!");
+                                    }
+                                    found.setMaximumCount(newPool.getMaximumCount());
+                                    changed = true;
+                                }
+                                if (!found.getEnabled().equals(newPool.getEnabled())) {
+                                    if (!newPool.getEnabled() && found.getReservations().size() > 0) {
+                                        throw new VMPoolImportFileException("Can not disable pool with trailing reservations!");
+                                    }
+                                    found.setEnabled(newPool.getEnabled());
+                                    changed = true;
+                                }
+                                if (!found.getDescription().equals(newPool.getDescription())) {
+                                    found.setDescription(newPool.getDescription());
+                                    changed = true;
+                                }
+                                if (changed) {
+                                    vmPoolService.save(found);
+                                }
+                            } else {
+                                vmPoolService.save(newPool);
+                            }
+                        } catch (Exception e) {
                             String details = "";
-                            if(e.getMessage().contains("constraint [uk_")){
+                            if (e.getMessage().contains("constraint [uk_")) {
                                 details = " - Unique key";
-                            }else if(e.getMessage().contains("constraint [fk_")){
+                            } else if (e.getMessage().contains("constraint [fk_")) {
                                 details = " - Foreign key";
                             }
                             throw new VMPoolImportFileException("Constraint not met" + details);
                         }
                         vmPoolsNumber++;
-                    }
-                    else {
+                    } else {
                         throw new VMPoolImportFileException("Failed to parse the file!");
                     }
+                }
+
+                for (VMPool deleted : vmPools) {
+                    if (deleted.getReservations().size() > 0) {
+                        throw new VMPoolImportFileException("Can not delete pool with trailing reservations!");
+                    }
+                    vmPoolService.delete(deleted);
                 }
 
             } catch (IOException e) {
