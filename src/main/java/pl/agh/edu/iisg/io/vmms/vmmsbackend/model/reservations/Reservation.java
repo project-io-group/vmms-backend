@@ -17,6 +17,7 @@ import javax.validation.constraints.NotNull;
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Entity
@@ -40,9 +41,10 @@ public class Reservation {
 
     @ManyToOne
     @JoinColumn(name = "poolId")
+    @JsonManagedReference
     private VMPool pool;
 
-    @OneToMany(mappedBy = "reservation", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.REMOVE)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonManagedReference
     private List<ReservationPeriod> periods;
@@ -74,5 +76,25 @@ public class Reservation {
 
     public boolean isExpired(){
         return confirmationDate == null && deadlineToConfirm.before(new Date());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Reservation that = (Reservation) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(courseName, that.courseName) &&
+                Objects.equals(pool, that.pool) &&
+                Objects.equals(machinesNumber, that.machinesNumber) &&
+                Objects.equals(createDate, that.createDate) &&
+                Objects.equals(deadlineToConfirm, that.deadlineToConfirm) &&
+                Objects.equals(confirmationDate, that.confirmationDate);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id, courseName, pool, machinesNumber, createDate, deadlineToConfirm, confirmationDate);
     }
 }

@@ -86,11 +86,12 @@ public class VMPoolController {
                     VMPool newPool = o.get();
                     VMPool found = vmPoolService.find(newPool.getShortName());
                     try {
-                        processVmPool(vmPools, newPool, found);
+                        if (processVmPool(vmPools, newPool, found)) {
+                            vmPoolsNumber++;
+                        }
                     } catch (VMPoolImportFileException e){
                         errors.append("Error in line ").append(lines).append(": ").append(e.getMessage()).append("\n");
                     }
-                    vmPoolsNumber++;
                 } else {
                     errors.append("Error parsing line ").append(lines).append("\n");
                 }
@@ -114,7 +115,7 @@ public class VMPoolController {
         return vmPoolsNumber;
     }
 
-    private void processVmPool(List<VMPool> vmPools, VMPool newPool, VMPool found) throws VMPoolImportFileException {
+    private boolean processVmPool(List<VMPool> vmPools, VMPool newPool, VMPool found) throws VMPoolImportFileException {
         if (found != null) {
             vmPools.remove(found);
             boolean changed = false;
@@ -143,9 +144,12 @@ public class VMPoolController {
             }
             if (changed) {
                 vmPoolService.save(found);
+                return true;
             }
+            return false;
         } else {
             vmPoolService.save(newPool);
+            return true;
         }
     }
 }
