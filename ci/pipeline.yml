@@ -25,10 +25,10 @@ resources:
   source:
     api: https://api.run.pivotal.io
     organization: vmms
-    password: AGH_ust_1919
+    password: ((cf-password))
     skip_cert_check: true
     space: development
-    username: project.io.group.git.bot@gmail.com
+    username: ((cf-username))
 
 
 jobs:
