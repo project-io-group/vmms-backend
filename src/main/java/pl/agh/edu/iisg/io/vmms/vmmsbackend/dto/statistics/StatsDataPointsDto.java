@@ -11,5 +11,5 @@ public class StatsDataPointsDto {
 
     String name;
 
-    List<Double> data;
+    List<Double> dataPoints;
 }

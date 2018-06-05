@@ -10,6 +10,7 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.VMPoolRepository;
 import java.time.DayOfWeek;
 import java.time.Month;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class StatisticsServiceImpl implements StatisticsService {
@@ -27,10 +28,11 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public Map<VMPool, Double> getHourlyUsageInIntervalByVMPool(Date from, Date to) {
+    public Map<VMPool, Double> getHourlyUsageInIntervalByVMPool(Date from, Date to, Boolean includeDisabled) {
         Date now = new Date();
         Map<VMPool, Double> usageMap = new HashMap<>();
-        for(VMPool vmPool : vmPoolRepository.findAll()) {
+        final List<VMPool> vmPools = vmPoolRepository.findAll().stream().filter(entry -> includeDisabled ? true : entry.getEnabled()).collect(Collectors.toList());
+        for(VMPool vmPool : vmPools) {
             List<ReservationPeriod> periods = reservationPeriodRepository
                     .getAllPeriodsForVMPoolBetween(vmPool.getId(), now, from, to);
             double sum = 0;
@@ -48,11 +50,12 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public Map<VMPool, SortedMap<DayOfWeek, Double>> getHourlyUsageInIntervalByVMPoolAndDayOfWeek(Date from, Date to) {
+    public Map<VMPool, SortedMap<DayOfWeek, Double>> getHourlyUsageInIntervalByVMPoolAndDayOfWeek(Date from, Date to, Boolean includeDisabled) {
         Date now = new Date();
         Calendar calendar = Calendar.getInstance();
         Map<VMPool, SortedMap<DayOfWeek, Double>> usageMap = new HashMap<>();
-        for(VMPool vmPool : vmPoolRepository.findAll()) {
+        final List<VMPool> vmPools = vmPoolRepository.findAll().stream().filter(entry -> includeDisabled ? true : entry.getEnabled()).collect(Collectors.toList());
+        for(VMPool vmPool : vmPools) {
             List<ReservationPeriod> periods = reservationPeriodRepository
                     .getAllPeriodsForVMPoolBetween(vmPool.getId(), now, from, to);
             SortedMap <DayOfWeek, Double> usageInWeek = new TreeMap<>();
@@ -65,7 +68,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                 Date end = ( period.getEndDate().before(to) ) ? period.getEndDate() : to;
 
                 calendar.setTime(start);
-                DayOfWeek dayOfWeek = DayOfWeek.of(calendar.get(Calendar.DAY_OF_WEEK)+1); // why calendar is 0 based grr
+                DayOfWeek dayOfWeek = DayOfWeek.of(calendar.get(Calendar.DAY_OF_WEEK));
 
                 double hours = (end.getTime() - start.getTime()) / TIME_TO_HOURS_FACTOR;
                 usageInWeek.put(dayOfWeek,
@@ -77,11 +80,12 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public Map<VMPool, SortedMap<Month, Double>> getHourlyUsageInIntervalByVMPoolAndMonth(Date from, Date to) {
+    public Map<VMPool, SortedMap<Month, Double>> getHourlyUsageInIntervalByVMPoolAndMonth(Date from, Date to, Boolean includeDisabled) {
         Date now = new Date();
         Calendar calendar = Calendar.getInstance();
         Map<VMPool, SortedMap<Month, Double>> usageMap = new HashMap<>();
-        for(VMPool vmPool : vmPoolRepository.findAll()) {
+        final List<VMPool> vmPools = vmPoolRepository.findAll().stream().filter(entry -> includeDisabled ? true : entry.getEnabled()).collect(Collectors.toList());
+        for(VMPool vmPool : vmPools) {
             List<ReservationPeriod> periods = reservationPeriodRepository
                     .getAllPeriodsForVMPoolBetween(vmPool.getId(), now, from, to);
             SortedMap <Month, Double> usageInMonth = new TreeMap<>();
