@@ -63,10 +63,10 @@ public class EmailController {
 
     @RequestMapping(method = RequestMethod.POST, path = "configure/subjects")
     @ResponseStatus(HttpStatus.CREATED)
-    public void importConfig(@RequestBody SubjectConfigurationDTO json) {
+    public void importConfig(@RequestBody SubjectConfigurationDTO subjectConfiguration) {
         mailSubjectService.drop();
 
-        for (SubjectConfigurationDTO.Subject subjectDto : json.subjects) {
+        for (SubjectConfigurationDTO.Subject subjectDto : subjectConfiguration.subjects) {
             MailSubject subject = new MailSubject();
             subject.setSubjectKey(subjectDto.key);
             subject.setSubject(subjectDto.subject);
