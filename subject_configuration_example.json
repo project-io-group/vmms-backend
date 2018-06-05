@@ -1,0 +1,16 @@
+{
+    "subjects": [
+        {
+            "key": "error",
+            "subject": "VMMS: Unexpected error"
+        },
+        {
+            "key": "extend-pool",
+            "subject": "VMMS: Pool extending request"
+        },
+        {
+            "key": "feature-request",
+            "subject": "VMMS: New feature request"
+        }
+    ]
+}
