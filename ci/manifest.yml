@@ -7,5 +7,3 @@ applications:
   - route: vmms-backend.cfapps.io
   stack: cflinuxfs2
   buildpack: java_buildpack
-  env:
-    SPRING_PROFILES_ACTIVE: prod

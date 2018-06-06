@@ -43,6 +43,11 @@ jobs:
     params:
       manifest: sourcecode/ci/manifest.yml
       path: build/vmms-backend-0.0.1-SNAPSHOT.jar
+      environment_variables:
+        SPRING_PROFILES_ACTIVE: prod
+        DATABASE_USERNAME: ((database-username))
+        DATABASE_PASSWORD: ((database-password))
+        SENDGRID_API_KEY: ((sendgrid-api-key))
   on_failure:
     put: slack-alert
     params:
