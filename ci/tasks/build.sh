@@ -5,7 +5,7 @@ chmod +x sourcecode/gradlew
 cd sourcecode
 
 export TERM=xterm
-echo $1
+export SENDGRID_API_KEY=$1
 
 ./gradlew clean build
 
