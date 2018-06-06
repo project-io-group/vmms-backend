@@ -8,13 +8,24 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.task.ReservationCleanupTask;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @SpringBootApplication
 @EnableTransactionManagement
 @EnableScheduling
 public class VmmsBackendApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(VmmsBackendApplication.class, args);
+        SpringApplication app = new SpringApplication(VmmsBackendApplication.class);
+        addDefaultProfile(app);
+        app.run(args);
+    }
+
+    private static void addDefaultProfile(SpringApplication app) {
+        Map<String, Object> defProperties = new HashMap<>();
+        defProperties.put("spring.profiles.default", "dev");
+        app.setDefaultProperties(defProperties);
     }
 
     @Bean

@@ -10,6 +10,9 @@ image_resource:
 inputs:
 - name: sourcecode
 
+outputs:
+- name: build
+
 run:
   path: sh
   args:

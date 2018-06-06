@@ -16,6 +16,12 @@ apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'pl.agh.edu.iisg.io.vmms.vmmsbackend.VmmsBackendApplication'
+    }
+}
+
 group = 'pl.agh.edu.iisg.io.vmms'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8

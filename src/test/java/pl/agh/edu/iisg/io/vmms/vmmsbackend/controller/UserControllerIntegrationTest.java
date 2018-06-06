@@ -15,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.user.UserDto;
@@ -32,6 +33,7 @@ import static org.hamcrest.Matchers.*;
 import static pl.agh.edu.iisg.io.vmms.vmmsbackend.controller.UserController.*;
 
 @RunWith(Theories.class)
+@ActiveProfiles("dev")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerIntegrationTest {
 
