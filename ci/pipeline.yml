@@ -39,6 +39,8 @@ jobs:
     trigger: true
   - task: build
     file: sourcecode/ci/tasks/build.yml
+    params:
+      SENDGRID_API_KEY: ((sendgrid-api-key))
   - put: pws-cf
     params:
       manifest: sourcecode/ci/manifest.yml
