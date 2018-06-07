@@ -68,3 +68,16 @@ You can define e-mail recipients by **POST**ing at `/email/configure/admins` wit
 + generate prod version of frontend
 + put all files from `dist` directory to `src/main/resources/static` directory
 + put `http://localhost:9045/index.html` in your browser
+
+### LDAP - notes
+Right now something goes wrong...  
+If You want to test it outside AGH_WPA You need to set up a tunnel.    
+App finds all ldap servers available in given discovery_path and can switch among found ones if any is broken but does not perform load balancing.   
+You can specify ldap protocol in ldap.properties: set `ldap.protocol=startTLS` to use LDAP StartTLS
+or `ldap.protocol=ldaps` to use LDAPS.  
+Current test ldap server certificate is inside `vmms.jks` file with `vmmsvmms` password.  
+To debug tls run app with `-Djavax.net.debug=SSL`
+
+`http://localhost:9045/ldap/users/` should list all people entitled to be users of our app :P  
+`http://localhost:9045/ldap/users/` should list all admins  
+Unfortunately endpoints keeps returning empty lists... :( 
