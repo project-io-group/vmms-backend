@@ -136,7 +136,7 @@ public class ReservationController {
 
         if(reservation.isPresent()) {
             Reservation extractedReservation = reservation.get();
-            List<ReservationPeriod> processedPeriods = extractedReservation.getPeriods();
+            List<ReservationPeriod> processedPeriods = new ArrayList(extractedReservation.getPeriods());
             List<Date> reservationDates = processedPeriods
                     .stream()
                     .map(reservationConverter:: convertPeriodToDay)
@@ -145,6 +145,7 @@ public class ReservationController {
             for (Date date: cancelledDates){
                 if (!reservationDates.contains(date)) throw new ReservationDateNotFoundException();
             }
+
             for(ReservationPeriod period : processedPeriods){
                 Date periodDay = reservationConverter.convertPeriodToDay(period);
                 if(cancelledDates.contains(periodDay))
