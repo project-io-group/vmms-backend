@@ -1,28 +1,38 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 
 import com.sendgrid.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.MailSendingFailureException;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.SendMailException;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMAdmin;
 
 import java.io.IOException;
 
-/**
- * Created by Paweł Taborowski on 31.05.18.
- */
+
 @Service
-public class MailServiceImpl implements MailService{
+public class MailServiceImpl implements MailService {
+
+    private static final Logger logger = LoggerFactory.getLogger(MailServiceImpl.class);
+
     private final Email from;
     private final SendGrid sg;
+    private final VMAdminService vmAdminService;
 
-    public MailServiceImpl(){
-        from = new Email("complaint@vmms.ki.agh.edu.pl");
+    @Autowired
+    public MailServiceImpl(VMAdminService vmAdminService) {
+
+        this.vmAdminService = vmAdminService;
+
+        from = new Email("vmms@ki.agh.edu.pl");
         String apiKey;
         try {
             apiKey = System.getenv("SENDGRID_API_KEY");
             if (apiKey.equals("")) {
                 throw new NullPointerException();
             }
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             throw new RuntimeException("Failed to access SendGrid API key! " +
                     "Please set SENDGRID_API_KEY environment variable");
         }
@@ -30,18 +40,14 @@ public class MailServiceImpl implements MailService{
     }
 
     @Override
-    public void sendMail(String subject, String content, String toEmail, String toName)  throws MailSendingFailureException{
-        Email to = new Email(toEmail, toName);
-        sendMail_internal(subject, content, to);
+    public void sendToAllAdmins(String subject, String content) throws SendMailException {
+        for (VMAdmin admin : vmAdminService.getVmAdmins()) {
+            send(subject, content, new Email(admin.getEMail(), admin.getName()));
+        }
     }
 
     @Override
-    public void sendMail(String subject, String content, String toEmail)  throws MailSendingFailureException{
-        Email to = new Email(toEmail);
-        sendMail_internal(subject, content, to);
-    }
-
-    private void sendMail_internal(String subject, String content, Email to) throws MailSendingFailureException {
+    public void send(String subject, String content, Email to) throws SendMailException {
         Content contentObj = new Content("text/plain", content);
 
         Mail mail = new Mail(from, subject, to, contentObj);
@@ -52,10 +58,12 @@ public class MailServiceImpl implements MailService{
             request.setBody(mail.build());
             Response response = sg.api(request);
             int status = response.getStatusCode();
-            if (status < 200 || status > 299)
-                throw new MailSendingFailureException("API returned HTTP status " + status);
+            if (status < 200 || status > 299) {
+                throw new SendMailException("API returned HTTP status " + status);
+            }
+            logger.info("Sent mail '{}' to '{}'", subject, to.getEmail());
         } catch (IOException ex) {
-            throw new MailSendingFailureException(ex);
+            throw new SendMailException(ex);
         }
     }
 }

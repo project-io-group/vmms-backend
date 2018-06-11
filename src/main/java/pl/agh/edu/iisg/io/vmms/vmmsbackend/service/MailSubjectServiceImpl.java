@@ -2,36 +2,42 @@ package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.MailSubject;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.MailSubjectRepository;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.MailKeySubject;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.MailKeySubjectRepository;
+
+import java.util.Optional;
 
 @Service
 public class MailSubjectServiceImpl implements MailSubjectService {
 
-    private final MailSubjectRepository mailSubjectRepository;
+    private final MailKeySubjectRepository mailKeySubjectRepository;
 
     @Autowired
-    public MailSubjectServiceImpl(MailSubjectRepository mailSubjectRepository) {
-        this.mailSubjectRepository = mailSubjectRepository;
+    public MailSubjectServiceImpl(MailKeySubjectRepository mailKeySubjectRepository) {
+        this.mailKeySubjectRepository = mailKeySubjectRepository;
     }
 
     @Override
-    public MailSubject find(String subject) {
-        return mailSubjectRepository.findFirstBySubjectKey(subject);
+    public Optional<String> find(String subjectKey) {
+        return mailKeySubjectRepository.findFirstByKey(subjectKey).map(MailKeySubject::getSubject);
     }
 
     @Override
-    public MailSubject find(Long id) {
-        return mailSubjectRepository.getOne(id);
+    public Optional<String> find(Long id) {
+        return mailKeySubjectRepository.findById(id).map(MailKeySubject::getSubject);
     }
 
     @Override
-    public void drop(){
-        mailSubjectRepository.deleteAll();
+    public void drop() {
+        mailKeySubjectRepository.deleteAll();
     }
 
     @Override
-    public MailSubject save(MailSubject mailSubject) {
-        return mailSubjectRepository.save(mailSubject);
+    public void save(String key, String subject) {
+        MailKeySubject mks = new MailKeySubject();
+        mks.setKey(key);
+        mks.setSubject(subject);
+        mailKeySubjectRepository.save(mks);
     }
+
 }

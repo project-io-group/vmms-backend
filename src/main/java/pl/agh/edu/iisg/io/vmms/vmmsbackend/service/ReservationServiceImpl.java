@@ -1,9 +1,13 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.constant.Mail;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.repository.ReservationPeriodRepository;
@@ -19,14 +23,23 @@ import java.util.stream.Collectors;
 @Validated
 public class ReservationServiceImpl implements ReservationService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ReservationServiceImpl.class);
+
     private final ReservationRepository reservationRepository;
     private final ReservationPeriodRepository reservationPeriodRepository;
+    private final MailService mailService;
+    private final MailSubjectService mailSubjectService;
 
     @Autowired
-    ReservationServiceImpl(ReservationRepository reservationRepository,
-                           ReservationPeriodRepository reservationPeriodRepository) {
+    ReservationServiceImpl(
+            ReservationRepository reservationRepository,
+            ReservationPeriodRepository reservationPeriodRepository,
+            MailService mailService,
+            MailSubjectService mailSubjectService) {
         this.reservationRepository = reservationRepository;
         this.reservationPeriodRepository = reservationPeriodRepository;
+        this.mailService = mailService;
+        this.mailSubjectService = mailSubjectService;
     }
 
     @Override
@@ -55,27 +68,27 @@ public class ReservationServiceImpl implements ReservationService {
     @Transactional
     @Override
     public Reservation saveTemporary(Reservation reservation,
-                              Date startTime,
-                              Date endTime,
-                              List<Date> days) {
+                                     Date startTime,
+                                     Date endTime,
+                                     List<Date> days) {
 
         Date now = new Date();
         reservation.setCreateDate(now);
         reservation.setDeadlineToConfirmAccordingToCreationTime(now);
         Reservation r = reservationRepository.save(reservation);
         r.setPeriods(new ArrayList<>());
-        for(Date day : days){
+        for (Date day : days) {
 
             Date from = new Date(day.getTime() + startTime.getTime());
             Date to = new Date(day.getTime() + endTime.getTime());
             try {
                 ReservationPeriod reservationPeriod = new ReservationPeriod(from, to, r);
                 //condition to be removed if autowiring in Validator is fixed
-                if(isReservationPeriodValid(reservationPeriod)){
-                    r.addPeriod(reservationPeriodRepository.save( reservationPeriod));
+                if (isReservationPeriodValid(reservationPeriod)) {
+                    r.addPeriod(reservationPeriodRepository.save(reservationPeriod));
                 }
                 //
-            }catch(Exception e){
+            } catch (Exception e) {
                 System.out.println("Collision");
                 e.printStackTrace();
             }
@@ -93,6 +106,30 @@ public class ReservationServiceImpl implements ReservationService {
 
         reservation.setConfirmationDate(new Date());
         reservationRepository.save(reservation);
+
+        if (!reservation.getPool().getEnabled()) {
+            notifyAdmin(reservation);
+        }
+
+    }
+
+    private void notifyAdmin(Reservation reservation) {
+        try {
+            String subject = mailSubjectService
+                    .find(Mail.SubjectKeys.ENABLE_POOL)
+                    .orElse(Mail.Subjects.ENABLE_POOL);
+
+            VMPool pool = reservation.getPool();
+
+            String content = "Pool: " + pool.getShortName() + " / " + pool.getDisplayName() +
+                    "\n\nUser: " + reservation.getOwner().getUserName() +
+                    "\n\nCourse: " + reservation.getCourseName();
+
+            mailService.sendToAllAdmins(subject, content);
+
+        } catch (Exception e) {
+            logger.warn("Admin won't be notified about reservation on disabled vm pool", e);
+        }
     }
 
     @Override
@@ -101,7 +138,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public void deletePeriod(ReservationPeriod period){
+    public void deletePeriod(ReservationPeriod period) {
         reservationPeriodRepository.delete(period);
     }
 
@@ -119,9 +156,10 @@ public class ReservationServiceImpl implements ReservationService {
             return false;
         }
         Date now = new Date();
-        if(reservationPeriod.getStartDate().before(now)
-                || reservationPeriod.getEndDate().before(now))
+        if (reservationPeriod.getStartDate().before(now)
+                || reservationPeriod.getEndDate().before(now)) {
             return false;
+        }
 
       /*  try {
             new ObjectMapper().writeValue(System.out, reservationPeriod);
@@ -142,43 +180,44 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
 
-    private Integer getMaxMachinesCountInOneTime(List<ReservationPeriod> periods){
+    private Integer getMaxMachinesCountInOneTime(List<ReservationPeriod> periods) {
 
-        if (periods.isEmpty()){
+        if (periods.isEmpty()) {
             return 0;
         }
 
         List<ReservationPeriod> sortedByStartDate = periods
                 .stream()
                 .sorted((x, y) -> {
-                    if(x.getStartDate().before(y.getStartDate()))
+                    if (x.getStartDate().before(y.getStartDate()))
                         return -1;
                     return 1;
-                } )
+                })
                 .collect(Collectors.toList());
 
         List<ReservationPeriod> sortedByEndDate = periods
                 .stream()
                 .sorted((x, y) -> {
-                    if(x.getEndDate().before(y.getEndDate()))
+                    if (x.getEndDate().before(y.getEndDate())) {
                         return -1;
+                    }
                     return 1;
-                } )
+                })
                 .collect(Collectors.toList());
 
         Date currentDate;
         int currentMachinesNumber = 0;
         int max = 0;
         int j = 0;
-        for(int i=0; i<periods.size(); i++){
+        for (int i = 0; i < periods.size(); i++) {
             currentDate = sortedByStartDate.get(i).getStartDate();
             currentMachinesNumber += sortedByStartDate.get(i).getReservation().getMachinesNumber();
 
-            while(!sortedByEndDate.get(j).getEndDate().after(currentDate)){
+            while (!sortedByEndDate.get(j).getEndDate().after(currentDate)) {
                 currentMachinesNumber -= sortedByEndDate.get(j).getReservation().getMachinesNumber();
                 j++;
             }
-            if(max < currentMachinesNumber){
+            if (max < currentMachinesNumber) {
                 max = currentMachinesNumber;
             }
         }
