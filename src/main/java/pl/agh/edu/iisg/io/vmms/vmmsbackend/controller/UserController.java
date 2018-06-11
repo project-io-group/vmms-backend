@@ -50,8 +50,6 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public String signUp(@RequestBody UserSignUpRequestDto registerRequest) {
-        // we are using email as the username fullName parameter should not be used as username
-        // because it is optional. Currently fullname is not stored at all
 
         if (userService.find(registerRequest.getEmail()) == null) {
             ApplicationUser applicationUser = new ApplicationUser();

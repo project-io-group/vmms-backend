@@ -13,8 +13,5 @@ public class UserDto {
     private Long id;
 
     @JsonProperty("name")
-    private String userName;
-
-    @JsonProperty("admin")
-    private boolean isAdmin;
+    private String email;
 }

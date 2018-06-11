@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class ReservationRequestDto {
 
-    Long userId;
+    String userEmail;
     Long vmPoolId;
     Integer machinesNumber;
     String courseName;

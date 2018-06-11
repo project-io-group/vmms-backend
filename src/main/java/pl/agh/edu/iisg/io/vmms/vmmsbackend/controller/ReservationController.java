@@ -159,7 +159,7 @@ public class ReservationController {
 
     private Reservation convertToReservation(ReservationRequestDto request) {
 
-        ApplicationUser user = userService.find(request.getUserId());
+        ApplicationUser user = userService.find(request.getUserEmail());
         VMPool vmPool = vmPoolService.find(request.getVmPoolId());
 
         Reservation reservation = new Reservation();

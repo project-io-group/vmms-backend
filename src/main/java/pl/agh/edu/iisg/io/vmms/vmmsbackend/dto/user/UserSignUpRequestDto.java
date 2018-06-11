@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 public class UserSignUpRequestDto {
 
     Boolean terms;
-    String fullName;
     String email;
     String password;
     String confirmPassword;
