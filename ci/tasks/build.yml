@@ -15,6 +15,5 @@ run:
   args:
   - -exc
   - |
-    chmod +x sourcecode/ci/tasks/build.sh
-    chmod +x sourcecode/gradlew
-    sourcecode/ci/tasks/build.sh
+    chmod +x ./sourcecode/ci/tasks/perm-patch.sh
+    ./sourcecode/ci/tasks/perm-patch.sh ./sourcecode/ci/tasks/build.sh
