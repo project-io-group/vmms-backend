@@ -1,10 +1,13 @@
 package pl.agh.edu.iisg.io.vmms.vmmsbackend.service;
 
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.MailSubject;
+import java.util.Optional;
 
 public interface MailSubjectService {
-    MailSubject find(String subject);
-    MailSubject find(Long id);
+    Optional<String> find(String key);
+
+    Optional<String> find(Long id);
+
     void drop();
-    MailSubject save(MailSubject mailSubject);
+
+    void save(String key, String subject);
 }
