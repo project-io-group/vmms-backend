@@ -7,14 +7,9 @@ import org.springframework.web.multipart.MultipartFile;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.VMPoolImportFileException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.HttpException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.parsers.VMPoolCSVParser;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.VMPoolService;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
-import java.util.Optional;
 
 @CrossOrigin("*")
 @RestController
@@ -43,46 +38,32 @@ public class VMPoolController {
         return vmPoolService.findByDescriptionContaining(tag);
     }
 
+
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.CREATED)
+    public String updateFromFile(@RequestParam("file") MultipartFile file) throws HttpException {
+        int vmPoolsNumber = 0;
+        if (!file.isEmpty()) {
+            vmPoolsNumber = updateVmPools(file, false);
+        }
+
+        return "Updated " + vmPoolsNumber + " virtual machine pools.";
+    }
+
     @RequestMapping(value = "/import", method = RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public String importFromFile(@RequestParam("file") MultipartFile file) throws HttpException {
 
         int vmPoolsNumber = 0;
         if (!file.isEmpty()) {
-            try {
-                String line;
-                BufferedReader bufferedReader = new BufferedReader(
-                        new InputStreamReader(file.getInputStream()));
-
-                VMPoolCSVParser parser = new VMPoolCSVParser();
-
-                while ((line = bufferedReader.readLine()) != null) {
-                    Optional<VMPool> o = parser.parseLine(line);
-                    if(o.isPresent()) {
-                        System.out.println("parsed");
-                        try{
-                            vmPoolService.save(o.get());
-                        }catch (Exception e){
-                            String details = "";
-                            if(e.getMessage().contains("constraint [uk_")){
-                                details = " - Unique key";
-                            }else if(e.getMessage().contains("constraint [fk_")){
-                                details = " - Foreign key";
-                            }
-                            throw new VMPoolImportFileException("Constraint not met" + details);
-                        }
-                        vmPoolsNumber++;
-                    }
-                    else {
-                        throw new VMPoolImportFileException("Failed to parse the file!");
-                    }
-                }
-
-            } catch (IOException e) {
-                throw new VMPoolImportFileException("Failed to open the file!");
-            }
+            vmPoolsNumber = updateVmPools(file, true);
         }
 
         return "Created " + vmPoolsNumber + " virtual machine pools.";
     }
+
+    private int updateVmPools(@RequestParam("file") MultipartFile file, boolean replace) throws VMPoolImportFileException {
+        return vmPoolService.updateVmPools(file, replace);
+    }
+
 }
