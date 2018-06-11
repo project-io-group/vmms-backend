@@ -12,7 +12,7 @@ import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.ReservationDateNotFoundExce
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.ReservationExpiredException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.ReservationNotFoundException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.HttpException;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.ApplicationUser;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.Reservation;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.reservations.ReservationPeriod;
@@ -159,7 +159,7 @@ public class ReservationController {
 
     private Reservation convertToReservation(ReservationRequestDto request) {
 
-        User user = userService.find(request.getUserId());
+        ApplicationUser user = userService.find(request.getUserId());
         VMPool vmPool = vmPoolService.find(request.getVmPoolId());
 
         Reservation reservation = new Reservation();

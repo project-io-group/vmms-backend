@@ -5,9 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.dto.user.UserSignUpRequestDto;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.HttpException;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.MissingUserIdException;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.exeption.UserNotFoundException;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.HttpException;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.MissingUserIdException;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.exception.http.UserNotFoundException;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.ApplicationUser;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.security.SecurityConstants;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.service.UserService;
@@ -55,7 +55,6 @@ public class UserController {
 
         if (userService.find(registerRequest.getEmail()) == null) {
             ApplicationUser applicationUser = new ApplicationUser();
-            applicationUser.setUserName(registerRequest.getEmail());
             applicationUser.setEmail(registerRequest.getEmail());
             applicationUser.setPassword(bCryptPasswordEncoder.encode(registerRequest.getPassword()));
 

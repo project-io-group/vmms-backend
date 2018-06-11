@@ -122,7 +122,7 @@ public class ReservationServiceImpl implements ReservationService {
             VMPool pool = reservation.getPool();
 
             String content = "Pool: " + pool.getShortName() + " / " + pool.getDisplayName() +
-                    "\n\nUser: " + reservation.getOwner().getUserName() +
+                    "\n\nUser: " + reservation.getOwner().getEmail() +
                     "\n\nCourse: " + reservation.getCourseName();
 
             mailService.sendToAllAdmins(subject, content);

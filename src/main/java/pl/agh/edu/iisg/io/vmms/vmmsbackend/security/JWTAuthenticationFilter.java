@@ -41,7 +41,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
             return authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            creds.getUserName(),
+                            creds.getEmail(),
                             creds.getPassword(), new ArrayList<>())
             );
         } catch (IOException e) {
@@ -51,7 +51,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private ApplicationUser convertDto(UserLoginRequestDto credsDto) {
         ApplicationUser creds = new ApplicationUser();
-        creds.setUserName(credsDto.getEmail());
+        creds.setEmail(credsDto.getEmail());
         creds.setPassword(credsDto.getPassword());
         creds.setEmail(credsDto.getEmail());
         return creds;

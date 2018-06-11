@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.User;
+import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.ApplicationUser;
 import pl.agh.edu.iisg.io.vmms.vmmsbackend.model.VMPool;
 
 import javax.persistence.*;
@@ -34,7 +34,7 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(name = "userId")
     @JsonBackReference
-    private User owner;
+    private ApplicationUser owner;
 
     private String courseName;
 

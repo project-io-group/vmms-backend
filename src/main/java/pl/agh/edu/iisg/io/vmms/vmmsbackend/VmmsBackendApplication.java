@@ -33,7 +33,4 @@ public class VmmsBackendApplication {
         return new BCryptPasswordEncoder();
     }
 
-    public static void main(String[] args) {
-        SpringApplication.run(VmmsBackendApplication.class, args);
-    }
 }

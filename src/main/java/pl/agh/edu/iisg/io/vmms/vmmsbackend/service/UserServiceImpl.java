@@ -21,12 +21,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<ApplicationUser> findByNameContaining(String name) {
-        return userRepository.findAllByUserNameContaining(name);
+        return userRepository.findAllByEmailContaining(name);
     }
 
     @Override
     public ApplicationUser find(String name) {
-        return userRepository.findFirstByUserName(name);
+        return userRepository.findFirstByEmail(name);
     }
 
     @Override
@@ -40,9 +40,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ApplicationUser save(String name) {
+    public ApplicationUser save(String email) {
         ApplicationUser applicationUser = new ApplicationUser();
-        applicationUser.setUserName(name);
+        applicationUser.setEmail(email);
         return userRepository.save(applicationUser);
     }
 
