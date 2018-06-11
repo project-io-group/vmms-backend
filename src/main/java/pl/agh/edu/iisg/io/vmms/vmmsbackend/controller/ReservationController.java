@@ -148,9 +148,10 @@ public class ReservationController {
 
             for(ReservationPeriod period : processedPeriods){
                 Date periodDay = reservationConverter.convertPeriodToDay(period);
-                if(cancelledDates.contains(periodDay))
+                if(cancelledDates.contains(periodDay)) {
                     extractedReservation.removePeriod(period);
                     reservationService.deletePeriod(period);
+                }
             }
         }
         else{
