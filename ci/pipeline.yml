@@ -6,12 +6,6 @@ resource_types:
     repository: cfcommunity/slack-notification-resource
     tag: latest
 
-- name: heroku-resource
-  type: docker-image
-  source:
-    repository: periscopedata/heroku-resource
-    tag: latest
-
 
 resources:
 - name: slack-alert
@@ -26,15 +20,36 @@ resources:
     branch: ((branch))
     private_key: ((git-private-key))
 
-- name: heroku
-  type: heroku-resource
+- name: pws-cf
+  type: cf
   source:
-    heroku_api_key: ((heroku-api-key))
-    heroku_app_name: vmms-backend
+    api: https://api.run.pivotal.io
+    organization: vmms
+    password: ((cf-password))
+    skip_cert_check: true
+    space: development
+    username: ((cf-username))
 
 
 jobs:
-- name: build
+- name: build-and-upload
+  serial: true
+  plan:
+  - get: sourcecode
+    trigger: true
+  - task: build
+    file: sourcecode/ci/tasks/build.yml
+    params:
+      SENDGRID_API_KEY: ((sendgrid-api-key))
+  - put: pws-cf
+    params:
+      manifest: sourcecode/ci/manifest.yml
+      path: build/vmms-backend-0.0.1-SNAPSHOT.jar
+      environment_variables:
+        SPRING_PROFILES_ACTIVE: prod
+        DATABASE_USERNAME: ((database-username))
+        DATABASE_PASSWORD: ((database-password))
+        SENDGRID_API_KEY: ((sendgrid-api-key))
   on_failure:
     put: slack-alert
     params:
@@ -44,15 +59,3 @@ jobs:
         http://35.180.56.35:8080//teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
         or at:
         http://35.180.56.35:8080//builds/$BUILD_ID
-  plan:
-  - get: sourcecode
-    trigger: true
-  - task: build
-    file: sourcecode/ci/tasks/build.yml
-#  - put: heroku
-#    timeout: 1m
-#    attempts: 1
-#    params:
-#      pipeline_id: {{pipeline-id}}
-#      source_app_id: {{source-app-id}}
-#      target_app_id: {{target-app-id}}

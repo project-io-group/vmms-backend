@@ -15,4 +15,4 @@ chown -R nonroot:nonroot /tmp/build
 
 chmod +x $1
 
-exec sudo -u nonroot $1
+exec sudo -u nonroot $1 ${SENDGRID_API_KEY}

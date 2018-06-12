@@ -1,0 +1,9 @@
+applications:
+- name: vmms-backend
+  instances: 1
+  memory: 1024M
+  disk_quota: 1024M
+  routes:
+  - route: vmms-backend.cfapps.io
+  stack: cflinuxfs2
+  buildpack: java_buildpack
